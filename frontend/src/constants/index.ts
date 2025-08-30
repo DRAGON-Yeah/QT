@@ -3,7 +3,7 @@
  */
 
 // API 基础配置
-export const API_BASE_URL = '/api/v1';
+export const API_BASE_URL = '/api';
 export const WS_BASE_URL = process.env.NODE_ENV === 'production' 
   ? `wss://${window.location.host}/ws`
   : `ws://${window.location.host}/ws`;

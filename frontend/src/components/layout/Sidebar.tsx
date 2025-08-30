@@ -9,7 +9,7 @@ import {
   DashboardOutlined,
   UserOutlined,
   LineChartOutlined,
-  BankOutlined,
+  FundOutlined,
   BarChartOutlined,
   SettingOutlined,
   TeamOutlined,
@@ -45,7 +45,7 @@ const Sidebar: React.FC = () => {
   const { sidebarCollapsed, mobileMenuOpen, setMobileMenuOpen } = useAppStore();
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
-  // 菜单项配置 - 重新设计的二级菜单结构
+  // 菜单项配置
   const menuItems = [
     {
       key: '/dashboard',
@@ -103,7 +103,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: 'strategy',
-      icon: <BankOutlined />,
+      icon: <FundOutlined />,
       label: '策略管理',
       children: [
         {
@@ -192,7 +192,6 @@ const Sidebar: React.FC = () => {
   // 处理菜单点击
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key);
-    // 移动端点击菜单后关闭侧边栏
     if (isMobile) {
       setMobileMenuOpen(false);
     }
@@ -203,59 +202,7 @@ const Sidebar: React.FC = () => {
     setOpenKeys(keys);
   };
 
-  // 根据当前路径设置选中的菜单项和展开的子菜单
-  useEffect(() => {
-    const pathname = location.pathname;
-    
-    // 查找匹配的菜单项
-    for (const item of menuItems) {
-      if (item.children) {
-        for (const child of item.children) {
-          if (pathname.startsWith(child.key)) {
-            // 如果当前路径匹配子菜单，展开对应的父菜单
-            if (!openKeys.includes(item.key)) {
-              setOpenKeys([...openKeys, item.key]);
-            }
-            break;
-          }
-        }
-      }
-    }
-  }, [location.pathname]);
-
-  // 获取当前选中的菜单项
-  const getSelectedKeys = () => {
-    const pathname = location.pathname;
-    
-    // 精确匹配
-    for (const item of menuItems) {
-      if (item.key === pathname) {
-        return [pathname];
-      }
-      if (item.children) {
-        for (const child of item.children) {
-          if (child.key === pathname) {
-            return [pathname];
-          }
-        }
-      }
-    }
-    
-    // 前缀匹配
-    for (const item of menuItems) {
-      if (item.children) {
-        for (const child of item.children) {
-          if (pathname.startsWith(child.key)) {
-            return [child.key];
-          }
-        }
-      }
-    }
-    
-    return [pathname];
-  };
-
-  const selectedKeys = getSelectedKeys();
+  const selectedKeys = [location.pathname];
 
   const siderClass = classNames('app-sidebar', {
     'app-sidebar--collapsed': sidebarCollapsed && !isMobile,
@@ -272,7 +219,6 @@ const Sidebar: React.FC = () => {
       breakpoint="lg"
       theme="dark"
     >
-      {/* Logo 区域 */}
       <div className="sidebar-logo">
         <div className="logo-content">
           {(!sidebarCollapsed || isMobile) && (
@@ -284,7 +230,6 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* 菜单 */}
       <Menu
         theme="dark"
         mode="inline"

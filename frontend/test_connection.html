@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantTrade 前后端连接测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1890ff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #262626;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+        .error {
+            background-color: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+        .info {
+            background-color: #f0f9ff;
+            border: 1px solid #91d5ff;
+            color: #1890ff;
+        }
+        button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #40a9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 QuantTrade 前后端连接测试</h1>
+        
+        <div class="test-section">
+            <div class="test-title">1. 健康检查测试</div>
+            <p>测试后端健康检查接口</p>
+            <button onclick="testHealthCheck()">测试健康检查</button>
+            <div id="health-result" class="test-result info">等待测试...</div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. API接口测试</div>
+            <p>测试用户API接口（预期返回401认证错误）</p>
+            <button onclick="testAPIEndpoint()">测试API接口</button>
+            <div id="api-result" class="test-result info">等待测试...</div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 综合测试</div>
+            <button onclick="runAllTests()">运行所有测试</button>
+            <div id="overall-result" class="test-result info">点击按钮开始测试...</div>
+        </div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+        }
+
+        async function testHealthCheck() {
+            try {
+                const response = await fetch('http://localhost:8000/health/');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('health-result', `✅ 健康检查成功！状态: ${data.status}`, true);
+                } else {
+                    showResult('health-result', `❌ 健康检查失败，状态码: ${response.status}`, false);
+                }
+            } catch (error) {
+                showResult('health-result', `❌ 健康检查失败: ${error.message}`, false);
+            }
+        }
+
+        async function testAPIEndpoint() {
+            try {
+                const response = await fetch('http://localhost:8000/api/users/');
+                
+                if (response.status === 401) {
+                    const data = await response.json();
+                    showResult('api-result', `✅ API接口正常！返回预期的401认证错误`, true);
+                } else {
+                    showResult('api-result', `⚠️ API接口响应异常，状态码: ${response.status}`, false);
+                }
+            } catch (error) {
+                showResult('api-result', `❌ API接口测试失败: ${error.message}`, false);
+            }
+        }
+
+        async function runAllTests() {
+            document.getElementById('overall-result').textContent = '正在运行测试...';
+            document.getElementById('overall-result').className = 'test-result info';
+            
+            await testHealthCheck();
+            await testAPIEndpoint();
+            
+            showResult('overall-result', '🎉 测试完成！请查看上方各项测试结果', true);
+        }
+
+        // 页面加载时自动运行测试
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</body>
+</html>

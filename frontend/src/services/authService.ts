@@ -35,12 +35,12 @@ class AuthService {
         showErrorMessage: false, // 登录错误由组件自己处理
       },
     } as any);
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || '登录失败');
     }
-    
+
     const result: ApiResponse<LoginResponse> = await response.json();
     return result.data!;
   }
@@ -50,7 +50,7 @@ class AuthService {
    */
   async logout(): Promise<void> {
     const token = localStorage.getItem('quanttrade_token');
-    
+
     if (token) {
       try {
         await silentFetch(`${API_BASE}/logout/`, {
@@ -64,7 +64,7 @@ class AuthService {
         console.warn('登出请求失败:', error);
       }
     }
-    
+
     // 清除本地存储
     localStorage.removeItem('quanttrade_token');
     localStorage.removeItem('quanttrade_user');
@@ -85,11 +85,11 @@ class AuthService {
         showErrorMessage: false, // 刷新token错误静默处理
       },
     } as any);
-    
+
     if (!response.ok) {
       throw new Error('刷新令牌失败');
     }
-    
+
     const result: ApiResponse<{ access_token: string }> = await response.json();
     return result.data!;
   }
@@ -99,11 +99,11 @@ class AuthService {
    */
   async getCurrentUser(): Promise<User> {
     const token = localStorage.getItem('quanttrade_token');
-    
+
     if (!token) {
       throw new Error('未找到认证令牌');
     }
-    
+
     const response = await fetch(`${API_BASE}/../profile/`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -113,11 +113,11 @@ class AuthService {
         showErrorMessage: false, // 用户信息错误静默处理
       },
     } as any);
-    
+
     if (!response.ok) {
       throw new Error('获取用户信息失败');
     }
-    
+
     const result: ApiResponse<User> = await response.json();
     return result.data!;
   }
@@ -146,11 +146,11 @@ class AuthService {
         },
         body: JSON.stringify({ permission }),
       });
-      
+
       if (!response.ok) {
         return false;
       }
-      
+
       const result = await response.json();
       return result.data?.hasPermission || false;
     } catch (error) {

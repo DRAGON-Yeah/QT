@@ -1,0 +1,309 @@
+ml>
+</ht/body>ipt>
+<</scr    ;
+     })00);
+   ction, 10tBasicConnemeout(tes       setTi
+      () => {ad',stener('lodEventLiindow.ad        w运行基础测试
+ 页面加载时自动      // }
+
+    }
+               ;
+  rror')atus', 'e'overall-stpdateStatus(    u            e);
+相关配置。`, fals(', ')}。请检查ts.joinfailedTes ${测试失败:lt', `❌ 部分all-resuerResult('ov  show            
+           ');
+       ush('CORS配置sts.pTes) failedcces!corsSu       if (
+         PI接口');sts.push('A failedTeuccess)   if (!apiS  
+           );('健康检查'ts.push failedTesccess)(!healthSu         if );
+       连接's.push('基础Testcess) failed(!basicSucif               [];
+   ailedTests = fnst    co           {
+   } else         s');
+  s', 'succesall-statutatus('over    updateS        true);
+    , 可以开始开发了！'通过！前后端连接正常，, '🎉 所有测试sult'relt('overall-esu  showR          ss) {
+    lSucce    if (al  
+               ;
+   Successrsss && coSucces && apilthSuccesheauccess && ss = basicSlSuccet alcons                 
+      ess');
+ tatus-succ('s.containsclassList).us''cors-statyId(mentBt.getEles = documenrsSuccesonst co       c    );
+ s-success'ains('statusList.contatus').clasById('api-stElementetent.g documapiSuccess =     const      );
+  s-success's('statutainList.cons').classtu('health-stayIdentBent.getElemocumss = dhealthSucce    const );
+        cess'us-sucins('statcontassList.us').cla('basic-statntByIdmeetEle.gdocumenticSuccess = asconst b            
+ // 检查所有测试结果      
+              ;
+    500))lve,soout(ree => setTimeise(resolvromit new P        awa
+    estCORS();     await t       
+         
+   olve, 500));imeout(res setT =>vese(resolew Promiawait n         
+   );oint(PIEndpt testAwai   a         
+            00));
+, 5olveeout(res => setTimolverese(ew Promisit n        awa   Check();
+ estHealth await t   
+                 
+   500));e, esolv(rsetTimeout => olveromise(resawait new P           );
+ ction(nneestBasicCot t  awai        
+             info';
+ t ult-resteslassName = 'esult').cverall-rntById('ont.getEleme  docume          行所有测试...';
+正在运= 't tContenext').t-resul('overallyIdementB.getEl document          
+ ing');ad'loatus', l-steral('ovatusteStpda         u   ests() {
+AllTtion runasync func
+        . 运行所有测试    // 5  }
+
+    
+          }        'error');
+tatus', ors-steStatus('c  upda             ;
+ e}`, false)r.messag: ${erroRS测试失败ult', `❌ COesrs-rult('cohowRes         s
+       or) {ch (err } cat        }
+                    'error');
+ors-status',teStatus('c    upda            se);
+    RS头', fal能有问题，未检测到COORS配置可️ Csult', '⚠ult('cors-reshowRes                 {
+     } else          ss');
+      'succeatus','cors-stStatus(date       up           e);
+  , tru-Origin']}`ol-Allowntress-Co'AcccorsHeaders[的源: ${！允许`✅ CORS配置正常esult', -rrsowResult('co          sh        n']) {
+  Allow-Origi-Control-rs['AccessHeadef (cors         i        
+               };
+            
+    ers')ow-Headntrol-Allcess-Coet('Acrs.gse.heades': responader-Allow-Hentrol 'Access-Co           
+        -Methods'),-Allowss-Control.get('Acceersesponse.headds': rethotrol-Allow-Mccess-Con'A                  ,
+  w-Origin')ntrol-Alloss-Cos.get('Accese.headergin': responriol-Allow-Os-Contr   'Acces               ers = {
+  sHead   const cor                   
+         
+       });          }
+                 '
+   ationype,Authoriz-Tent': 'Contersequest-Head-Control-R    'Access                    : 'GET',
+t-Method'uesol-Reqntrss-Co 'Acce                      t:3000',
+ localhostp://rigin': 'ht         'O               : {
+ders  hea            rs',
+        mode: 'co           ',
+       PTIONS'O   method:                 
+ s/', {i/userost:8000/apcalh://lottptch('hait fense = aw respo const             try {
+         g');
+     oadin-status', 'ltatus('cors    updateS      () {
+  estCORS t function   async     . CORS测试
+      // 4    }
+
+          }
+   r');
+     rros', 'e-statupiateStatus('a      upd        
+  false);ssage}`, r.me测试失败: ${erro `❌ API接口pi-result',ult('a   showRes            or) {
+ tch (err  } ca
+                }       rror');
+    'ei-status','aps( updateStatu                 lse);
+  us}`, faonse.stat{resp异常，状态码: $I接口响应t', `⚠️ APt('api-resul   showResul               else {
+          }   
+      ccess');, 'suatus'('api-statusSt  update             
+     );ueail}`, tr{data.det1认证错误: $40PI接口正常！返回预期的lt', `✅ At('api-resuowResulsh               ;
+     e.json()respons = await t data     cons              1) {
+ tatus === 40.sresponseif (           
+             ;
+               })        e: 'cors'
+      mod        
+       ET',ethod: 'G           m       
+  /users/', {pi000/ast:8calho://lo fetch('httpite = awa respons const                    try {
+   
+    ');oadings', 'l-statuus('apiupdateStat         int() {
+   IEndpotion testAP funcync
+        asPI接口测试3. A
+        // 
+
+        }    }       r');
+ rro-status', 'etus('health updateSta       
+         false);r.message}`,败: ${erro康检查失 健 `❌h-result',esult('healt    showR           
+ rror) { catch (e         }}
+              );
+     or' 'err-status',alths('hepdateStatu          u  ;
+        , false)se.status}`pon态码: ${res，状健康检查失败ult', `❌ th-res('healsultwRe       sho            {
+ e els}                );
+ ess's', 'succh-statualtus('heStatpdate     u                true);
+', ')}`,ecks).join(data.chkeys( ${Object.s}, 检查项:statuta.功！状态: ${da检查成lt', `✅ 健康esult('health-r  showResu             );
+     sponse.json(wait reata = a   const d              {
+   .ok) if (response             
+                 });
+                 rs'
+ de: 'co         mo  ,
+         hod: 'GET'     met         
+      , {000/health/'alhost:8'http://locwait fetch(= aresponse onst  c          try {
+                );
+ loading's', 'health-statu('tatusateS         updk() {
+   lthChecion testHeanct fu      async康检查测试
+     // 2. 健  }
+
+                   }
+ror');
+    tus', 'ersic-staStatus('ba   update            
+ false);`, r.message}${erro`❌ 连接失败: ult', -res'basicwResult( sho         r) {
+      ch (erro    } cat         }
+    
+           ;ccess')', 'sutatusasic-s('beStatus     updat     
+          rue);tatus}`, te.s ${respons状态码:连接成功， `✅ esult',('basic-rult     showRes                 } else {
+          );
+    s'successtatus', 's('basic-tuStapdate          u     ue);
+     运行', tr成功！后端服务器正在'✅ 基础连接esult', t('basic-resulshowR              
+      404页面说明连接成功Django的/          /         = 404) {
+  e.status ==responsif (                    
+              });
+           rs'
+   de: 'como                 T',
+    method: 'GE           
+        t:8000/', {hostp://localetch('htait f= awst response on       c    ry {
+               t;
+  ng')tus', 'loadiasic-statatus('b  updateS          ion() {
+icConnectestBasc function t     asyn试
+    // 1. 基础连接测}
+
+          
+     ror'}`;s' : 'erss ? 'succes ${isSuccet-resulte = `tesamlassNelement.c            = message;
+ontent textC    element.        ntId);
+elemed(ElementByIument.get= doct element        consss) {
+     Succe message, islementId,wResult(efunction sho      显示结果
+       //  
+
+         }}`;
+ statusus-${at sticatortus-ind= `stae amement.classN       eltId);
+     elemend(etElementByIcument.gment = do   const ele
+         , status) {tIdlemeneStatus(eon updat functi
+        // 更新状态指示器     ript>
+  <sc
+
+     </div>/div>
+      <     </div>
+始综合测试...info">点击按钮开t-result ="tesult" classll-resid="overaiv    <d       ton>
+  but">运行所有测试</()llTestsick="runAn onclutto       <biv>
+     /d  <         试结果
+ 5. 综合测              
+  "></span>ngus-loadi statcatorstatus-indiass="-status" clid="overall<span              ">
+   st-titles="teas  <div cl
+          -section">class="test       <div ->
+ 测试 - 综合     <!--
+
+       </div>iv>
+    ...</dfo">等待测试t-result in class="tesors-result" <div id="c        tton>
+   ORS</bu">测试C"testCORS()ick=clon on  <butt       p>
+   配置</ <p>测试跨域资源共享        
+      </div>      RS跨域测试
+      4. CO           ></span>
+  -loading"ustatndicator s-iass="statustus" cltacors-span id="   <s         
+    le">t-tit="tesssv cla<di            ion">
+"test-sects=   <div clas-->
+     -- CORS测试 
+        <!
+  </div>     v>
+ ...</di info">等待测试sulttest-re" class="sult="api-re    <div id     utton>
+   </b试API接口)">测PIEndpoint(k="testAn onclictto     <bu   误）</p>
+    （预期返回401认证错用户API接口p>测试         <iv>
+    </d  试
+         口测I接    3. AP           
+ "></span>gs-loadintu staindicatorus-"statlass=us" cpi-statpan id="a    <s         
+   e">est-titlss="tv cla<di          ">
+  ionest-sect"t class=        <div
+ -->!-- API接口测试      <v>
+
+          </di..</div>
+等待测试.nfo">t-result ilass="tes clt"esuh-r"healtd=      <div i    button>
+  )">测试健康检查</althCheck("testHe onclick=button  <
+          接口</p>测试后端健康检查         <p>div>
+        </      . 健康检查测试
+         2    
+    n>></spaing"us-loadtatindicator s="status-class" lth-status id="hea    <span         ">
+   est-title"t= class       <div
+     ction">est-seass="tdiv cl        <查测试 -->
+    <!-- 健康检
+
+        </div>v>
+    待测试...</dit info">等sul="test-result" classd="basic-re  <div i      n>
+    连接</butto">测试基础()ectionicConnk="testBasutton onclic <b        /p>
+   能够连接到后端服务器< <p>测试前端是否        /div>
+       <
+         基础连接测试      1.       /span>
+   "><atus-loadingtor sttatus-indica" class="satusd="basic-st     <span i     e">
+      t-titless="t clas    <div>
+        ion"test-sect class="iv        <d测试 -->
+ 基础连接        <!--     
+   </h1>
+e 前后端连接测试 QuantTrad1>🚀
+        <hntainer"> class="coy>
+    <div/head>
+<bodle>
+<  </sty
+  aad14; }olor: #found-cg { backgrs-loadin .statu; }
+       #ff4d4found-color: gr { backors-errtu      .sta
+  : #52c41a; }ground-color { backsuccesstus- .sta
+         }  
+    : 8px;gin-right     mar       us: 50%;
+r-radi  borde         x;
+ t: 12p       heigh     th: 12px;
+      wid     ne-block;
+ splay: inli          dir {
+  to-indicaatus
+        .st    }wed;
+    r: not-allocurso           9d9;
+ d9d: #ackground       b {
+     abledisn:dutto      b
+    }   ff;
+   40a9und: # backgro     
+      er {button:hov       
+   }      x;
+10p-right:   margin
+           pointer;sor:   cur      
+   dius: 4px; border-ra
+           : 8px 16px;    paddinge;
+        border: non            te;
+olor: whi   c        0ff;
+ round: #189   backg{
+         button            }
+   890ff;
+   color: #1           
+d #91d5ff;lipx so border: 1       ff;
+    f9 #f0or:ground-col back      {
+           .info     }
+   f4d4f;
+   color: #f           ffccc7;
+ olid #er: 1px sord          b0;
+  ff2f: #f-color background      {
+            .error
+       }c41a;
+    color: #52  ;
+         eb8fx solid #b7er: 1pbord     d;
+        #f6ffer:ground-colo        back
+    ccess { .su      }
+   
+      space; monoy:familont-          fx;
+  p: 10pton-argi       m     s: 4px;
+rder-radiu    bo;
+        px: 10ing padd     {
+       -result    .test }
+          2626;
+ : #26     color
+        15px;m:gin-botto      mar   00;
+   ight: 6     font-we    px;
+   18 font-size:        
+     {test-title       .    }
+ 
+    adius: 6px;rder-r       bo
+     8;e8e8e1px solid #   border: 
+         px;adding: 20     p
+        30px;ottom:gin-bar       m
+     section {est-
+        .t        }px;
+n-bottom: 30      margiter;
+      t-align: cen  tex          #1890ff;
+lor:       co
+         h1 {           }
+,0,0.1);
+  (0,0 8px rgba2pxadow: 0 sh       box-      8px;
+-radius:   border       px;
+  30   padding:         ;
+ ound: white    backgr       ner {
+ ontai
+        .c
+        }: #f5f5f5;ground-colorback           20px;
+ padding:             to;
+ aun: 0   margi      
+   00px;x-width: 8 ma           serif;
+sans-I', Roboto,  'Segoe Ut,mFonSysteBlinkMac-system, ly: -apple-fami       font{
+     ody       bstyle>
+   <
+   >端连接测试</titlentTrade 前后 <title>Qua.0">
+   ial-scale=1th, initid=device-wt="widthten" conewportta name="vi
+    <me">F-8="UTta charset
+    <me<head>">
+g="zh-CNtml lantml>
+<hPE h<!DOCTY
