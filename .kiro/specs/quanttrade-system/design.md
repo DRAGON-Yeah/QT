@@ -4,14 +4,27 @@
 
 QuantTrade量化交易系统采用现代化的微服务架构设计，基于Django + React技术栈，支持多租户、高并发、高可用的量化交易需求。系统设计遵循领域驱动设计(DDD)原则，采用分层架构模式，确保代码的可维护性和可扩展性。
 
+系统按照菜单结构组织为六个核心模块：
+- **仪表盘模块**：系统概览和快速操作入口
+- **账户管理模块**：用户管理、角色权限、交易账户配置
+- **交易中心模块**：现货交易、订单管理、持仓管理、交易历史
+- **策略管理模块**：策略开发、回测、监控、风险控制
+- **数据分析模块**：市场行情、收益分析、风险分析、报表中心
+- **系统设置模块**：菜单管理、系统监控、数据库管理、日志、配置
+
 ## 架构设计
 
 ### 系统架构图
 
 ```mermaid
 graph TB
-    subgraph "前端层"
-        A[React前端应用]
+    subgraph "前端层 - 按菜单模块组织"
+        A1[仪表盘页面]
+        A2[账户管理页面]
+        A3[交易中心页面]
+        A4[策略管理页面]
+        A5[数据分析页面]
+        A6[系统设置页面]
         B[WebSocket客户端]
     end
     
@@ -26,13 +39,16 @@ graph TB
         G[Celery异步任务]
     end
     
-    subgraph "业务层"
-        H[用户管理服务]
+    subgraph "业务层 - 按菜单模块组织"
+        H1[仪表盘服务]
+        H2[用户管理服务]
+        H3[交易执行服务]
+        H4[策略管理服务]
+        H5[数据分析服务]
+        H6[系统监控服务]
         I[交易所管理服务]
-        J[策略管理服务]
-        K[风险控制服务]
-        L[交易执行服务]
-        M[数据分析服务]
+        J[风险控制服务]
+        K[菜单管理服务]
     end
     
     subgraph "数据层"
@@ -47,38 +63,51 @@ graph TB
         S[市场数据源]
     end
     
-    A --> C
+    A1 --> C
+    A2 --> C
+    A3 --> C
+    A4 --> C
+    A5 --> C
+    A6 --> C
     B --> F
     C --> E
     C --> F
-    E --> H
+    E --> H1
+    E --> H2
+    E --> H3
+    E --> H4
+    E --> H5
+    E --> H6
     E --> I
     E --> J
     E --> K
-    E --> L
-    E --> M
-    G --> H
-    G --> I
-    G --> J
-    G --> K
-    G --> L
-    G --> M
-    H --> N
+    G --> H2
+    G --> H3
+    G --> H4
+    G --> H5
+    G --> H6
+    H1 --> N
+    H2 --> N
+    H3 --> N
+    H4 --> N
+    H5 --> N
+    H6 --> N
     I --> N
     J --> N
     K --> N
-    L --> N
-    M --> N
-    H --> O
+    H1 --> O
+    H2 --> O
+    H3 --> O
+    H4 --> O
+    H5 --> O
+    H6 --> O
     I --> O
     J --> O
     K --> O
-    L --> O
-    M --> O
-    M --> P
+    H5 --> P
     I --> Q
     I --> R
-    M --> S
+    H5 --> S
 ```
 
 ### 多租户架构设计
@@ -108,96 +137,220 @@ graph LR
 
 ## 组件和接口
 
-### 核心组件架构
+### 核心组件架构（按菜单模块组织）
 
-#### 1. 用户管理组件
+#### 1. 仪表盘模块组件
+- **DashboardService**: 仪表盘服务，聚合各模块数据
+- **AssetOverviewService**: 资产概览服务，统计总资产和盈亏
+- **TradingStatsService**: 交易统计服务，计算交易次数和成交金额
+- **StrategyStatusService**: 策略状态服务，监控策略运行状态
+- **NotificationService**: 通知服务，管理系统通知和预警
+- **QuickActionService**: 快速操作服务，提供快捷功能入口
+
+#### 2. 账户管理模块组件
 - **TenantManager**: 租户管理器，负责租户创建、隔离、权限控制
 - **AuthenticationService**: 认证服务，基于JWT的用户认证
 - **PermissionService**: 权限服务，基于RBAC的权限控制
 - **UserProfileService**: 用户资料服务，管理用户个人信息
-
-#### 2. 交易所管理组件
+- **RoleManagementService**: 角色管理服务，管理角色和权限分配
 - **ExchangeConnector**: 交易所连接器，基于CCXT的统一接口
 - **APIKeyManager**: API密钥管理器，安全存储和管理API密钥
 - **AccountManager**: 账户管理器，管理多交易所账户状态
 - **AssetMonitor**: 资产监控器，实时监控各交易所资产
 
-#### 3. 市场数据组件
-- **MarketDataCollector**: 市场数据收集器，从多个数据源收集数据
-- **DataProcessor**: 数据处理器，清洗和标准化市场数据
-- **TechnicalIndicator**: 技术指标计算器，计算各种技术指标
-- **DataStorage**: 数据存储器，高效存储历史数据
+#### 3. 交易中心模块组件
+- **OrderManager**: 订单管理器，统一订单生命周期管理
+- **TradeExecutor**: 交易执行器，自动化交易执行
+- **PositionManager**: 持仓管理器，实时持仓状态管理
+- **TradeRecorder**: 交易记录器，完整交易历史记录
+- **SpotTradingService**: 现货交易服务，处理现货交易逻辑
+- **OrderSyncService**: 订单同步服务，同步交易所订单状态
 
-#### 4. 策略管理组件
+#### 4. 策略管理模块组件
 - **StrategyEngine**: 策略引擎，执行用户策略代码
 - **BacktestEngine**: 回测引擎，高性能历史数据回测
 - **ParameterOptimizer**: 参数优化器，使用遗传算法优化参数
 - **StrategyRepository**: 策略仓库，版本控制和策略管理
-
-#### 5. 风险控制组件
+- **StrategyMonitor**: 策略监控器，实时监控策略运行状态
 - **RiskCalculator**: 风险计算器，实时计算各种风险指标
 - **AlertManager**: 预警管理器，多级风险预警机制
 - **StopLossManager**: 止损管理器，自动止损止盈执行
 - **RiskReporter**: 风险报告器，生成风险分析报告
 
-#### 6. 交易执行组件
-- **OrderManager**: 订单管理器，统一订单生命周期管理
-- **TradeExecutor**: 交易执行器，自动化交易执行
-- **PositionManager**: 持仓管理器，实时持仓状态管理
-- **TradeRecorder**: 交易记录器，完整交易历史记录
+#### 5. 数据分析模块组件
+- **MarketDataCollector**: 市场数据收集器，从多个数据源收集数据
+- **DataProcessor**: 数据处理器，清洗和标准化市场数据
+- **TechnicalIndicator**: 技术指标计算器，计算各种技术指标
+- **DataStorage**: 数据存储器，高效存储历史数据
+- **PerformanceAnalyzer**: 收益分析器，计算收益指标和统计
+- **RiskAnalyzer**: 风险分析器，分析风险分布和相关性
+- **ReportGenerator**: 报表生成器，生成各类分析报表
+- **DataExporter**: 数据导出器，支持多种格式数据导出
+
+#### 6. 系统设置模块组件
+- **MenuManager**: 菜单管理器，管理系统菜单结构和权限
+- **SystemMonitor**: 系统监控器，监控系统资源和性能
+- **CeleryManager**: Celery管理器，管理异步任务和队列
+- **DatabaseManager**: 数据库管理器，提供数据库操作界面
+- **RedisManager**: Redis管理器，管理Redis连接和操作
+- **LogManager**: 日志管理器，统一管理系统日志
+- **WebTerminal**: Web终端，提供基于Web的终端功能
+- **ConfigManager**: 配置管理器，管理系统配置参数
 
 ### 接口设计
 
-#### REST API接口
+#### REST API接口（按菜单模块组织）
 
 ```python
-# 用户管理接口
+# 仪表盘模块接口
+GET /api/v1/dashboard/overview/     # 获取仪表盘概览数据
+GET /api/v1/dashboard/assets/       # 获取资产统计
+GET /api/v1/dashboard/trading-stats/ # 获取交易统计
+GET /api/v1/dashboard/strategy-status/ # 获取策略状态
+GET /api/v1/dashboard/notifications/ # 获取系统通知
+POST /api/v1/dashboard/quick-action/ # 执行快速操作
+
+# 账户管理模块接口
+## 用户管理
 POST /api/v1/auth/login/          # 用户登录
 POST /api/v1/auth/logout/         # 用户登出
+GET  /api/v1/users/               # 获取用户列表
+POST /api/v1/users/               # 创建用户
+PUT  /api/v1/users/{id}/          # 更新用户
+DELETE /api/v1/users/{id}/        # 删除用户
 GET  /api/v1/users/profile/       # 获取用户资料
 PUT  /api/v1/users/profile/       # 更新用户资料
 
-# 交易所管理接口
+## 角色权限管理
+GET    /api/v1/roles/             # 获取角色列表
+POST   /api/v1/roles/             # 创建角色
+PUT    /api/v1/roles/{id}/        # 更新角色
+DELETE /api/v1/roles/{id}/        # 删除角色
+GET    /api/v1/permissions/       # 获取权限列表
+POST   /api/v1/roles/{id}/permissions/ # 分配权限
+
+## 交易所账户管理
 GET    /api/v1/exchanges/         # 获取交易所列表
 POST   /api/v1/exchanges/         # 添加交易所配置
 PUT    /api/v1/exchanges/{id}/    # 更新交易所配置
 DELETE /api/v1/exchanges/{id}/    # 删除交易所配置
 POST   /api/v1/exchanges/{id}/test/ # 测试交易所连接
+GET    /api/v1/exchanges/{id}/assets/ # 获取交易所资产
 
-# 市场数据接口
+# 交易中心模块接口
+## 现货交易
+POST /api/v1/trading/spot/orders/  # 创建现货订单
+GET  /api/v1/trading/spot/symbols/ # 获取交易对列表
+
+## 订单管理
+GET    /api/v1/orders/            # 获取订单列表
+POST   /api/v1/orders/            # 创建订单
+PUT    /api/v1/orders/{id}/       # 修改订单
+DELETE /api/v1/orders/{id}/       # 取消订单
+
+## 持仓管理
+GET /api/v1/positions/            # 获取持仓信息
+POST /api/v1/positions/{id}/close/ # 平仓操作
+
+## 交易历史
+GET /api/v1/trades/               # 获取交易历史
+GET /api/v1/trades/stats/         # 获取交易统计
+
+# 策略管理模块接口
+## 策略列表
+GET    /api/v1/strategies/        # 获取策略列表
+POST   /api/v1/strategies/        # 创建新策略
+PUT    /api/v1/strategies/{id}/   # 更新策略
+DELETE /api/v1/strategies/{id}/   # 删除策略
+
+## 策略回测
+POST /api/v1/strategies/{id}/backtest/ # 执行回测
+GET  /api/v1/backtests/{id}/      # 获取回测结果
+
+## 策略监控
+GET /api/v1/strategies/{id}/status/ # 获取策略状态
+POST /api/v1/strategies/{id}/start/ # 启动策略
+POST /api/v1/strategies/{id}/stop/  # 停止策略
+
+## 风险控制
+GET /api/v1/risk/metrics/         # 获取风险指标
+GET /api/v1/risk/alerts/          # 获取风险预警
+POST /api/v1/risk/alerts/         # 创建风险预警规则
+
+# 数据分析模块接口
+## 市场行情
 GET /api/v1/market/symbols/       # 获取交易对列表
 GET /api/v1/market/ticker/{symbol}/ # 获取实时价格
 GET /api/v1/market/klines/{symbol}/ # 获取K线数据
 GET /api/v1/market/depth/{symbol}/  # 获取深度数据
 
-# 策略管理接口
-GET    /api/v1/strategies/        # 获取策略列表
-POST   /api/v1/strategies/        # 创建新策略
-PUT    /api/v1/strategies/{id}/   # 更新策略
-DELETE /api/v1/strategies/{id}/   # 删除策略
-POST   /api/v1/strategies/{id}/backtest/ # 执行回测
+## 收益分析
+GET /api/v1/analysis/performance/ # 获取收益分析
+GET /api/v1/analysis/returns/     # 获取收益统计
 
-# 交易管理接口
-GET    /api/v1/orders/            # 获取订单列表
-POST   /api/v1/orders/            # 创建订单
-PUT    /api/v1/orders/{id}/       # 修改订单
-DELETE /api/v1/orders/{id}/       # 取消订单
-GET    /api/v1/positions/         # 获取持仓信息
+## 风险分析
+GET /api/v1/analysis/risk/        # 获取风险分析
+GET /api/v1/analysis/correlation/ # 获取相关性分析
 
-# 风险管理接口
-GET /api/v1/risk/metrics/         # 获取风险指标
-GET /api/v1/risk/alerts/          # 获取风险预警
-POST /api/v1/risk/alerts/         # 创建风险预警规则
+## 报表中心
+GET /api/v1/reports/              # 获取报表列表
+POST /api/v1/reports/generate/    # 生成报表
+GET /api/v1/reports/{id}/export/  # 导出报表
+
+# 系统设置模块接口
+## 菜单管理
+GET    /api/v1/menus/             # 获取菜单列表
+POST   /api/v1/menus/             # 创建菜单
+PUT    /api/v1/menus/{id}/        # 更新菜单
+DELETE /api/v1/menus/{id}/        # 删除菜单
+
+## 系统监控
+GET /api/v1/system/monitor/       # 获取系统监控数据
+GET /api/v1/system/health/        # 系统健康检查
+
+## 数据库管理
+GET  /api/v1/database/tables/     # 获取数据库表列表
+POST /api/v1/database/query/      # 执行SQL查询
+POST /api/v1/database/export/     # 导出数据
+
+## Redis管理
+GET  /api/v1/redis/keys/          # 获取Redis键列表
+POST /api/v1/redis/command/       # 执行Redis命令
+GET  /api/v1/redis/stats/         # 获取Redis统计
+
+## 系统日志
+GET /api/v1/logs/                 # 获取系统日志
+GET /api/v1/logs/search/          # 搜索日志
+
+## 系统配置
+GET /api/v1/config/               # 获取系统配置
+PUT /api/v1/config/               # 更新系统配置
 ```
 
-#### WebSocket接口
+#### WebSocket接口（按功能模块组织）
 
 ```python
-# 实时数据推送
-ws://domain/ws/market/{symbol}/   # 市场数据推送
+# 仪表盘实时数据推送
+ws://domain/ws/dashboard/         # 仪表盘数据推送
+ws://domain/ws/notifications/     # 系统通知推送
+
+# 交易中心实时数据推送
 ws://domain/ws/orders/            # 订单状态推送
 ws://domain/ws/positions/         # 持仓变化推送
+ws://domain/ws/trades/            # 交易记录推送
+
+# 策略管理实时数据推送
+ws://domain/ws/strategies/        # 策略状态推送
 ws://domain/ws/alerts/            # 风险预警推送
+
+# 数据分析实时数据推送
+ws://domain/ws/market/{symbol}/   # 市场数据推送
+ws://domain/ws/klines/{symbol}/   # K线数据推送
+ws://domain/ws/depth/{symbol}/    # 深度数据推送
+
+# 系统设置实时数据推送
+ws://domain/ws/system/monitor/    # 系统监控数据推送
+ws://domain/ws/logs/              # 日志实时推送
 ```
 
 ## 数据模型
