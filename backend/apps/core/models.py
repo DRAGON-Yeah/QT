@@ -71,6 +71,10 @@ class TenantManager(models.Manager):
         if tenant:
             return super().get_queryset().filter(tenant=tenant)
         return super().get_queryset()
+    
+    def all_tenants(self):
+        """获取所有租户的数据（不过滤）"""
+        return super().get_queryset()
 
 
 class TenantModel(models.Model):

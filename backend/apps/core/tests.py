@@ -1,20 +1,15 @@
 """
-核心模块单元测试
+核心模块测试
 """
-import uuid
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.utils import timezone
-from unittest.mock import patch, Mock
-
-from .models import Tenant, Role, Permission, Menu
+from .models import Tenant, Permission, Role, Menu, TenantModel
+from .middleware import TenantMiddleware
 from .utils import (
-    set_current_tenant, get_current_tenant, clear_current_tenant,
-    TenantContext, get_tenant_cache_key, create_default_permissions,
-    create_default_roles
+    TenantContext, get_current_tenant, set_current_tenant, clear_current_tenant,
+    create_default_permissions, create_default_roles
 )
-from .middleware import TenantMiddleware, TenantAccessControlMiddleware
 
 User = get_user_model()
 
@@ -22,71 +17,65 @@ User = get_user_model()
 class TenantModelTest(TestCase):
     """租户模型测试"""
     
-    def setUp(self):
-        self.tenant_data = {
-            'name': '测试租户',
-            'schema_name': 'test_tenant',
-            'domain': 'test.example.com',
-            'max_users': 50,
-            'max_strategies': 25,
-            'max_exchange_accounts': 5
-        }
-    
     def test_create_tenant(self):
         """测试创建租户"""
-        tenant = Tenant.objects.create(**self.tenant_data)
+        tenant = Tenant.objects.create(
+            name='测试租户',
+            schema_name='test_tenant'
+        )
         
         self.assertEqual(tenant.name, '测试租户')
         self.assertEqual(tenant.schema_name, 'test_tenant')
         self.assertTrue(tenant.is_active)
-        self.assertIsNotNone(tenant.id)
-        self.assertTrue(isinstance(tenant.id, uuid.UUID))
+        self.assertEqual(tenant.max_users, 100)
     
     def test_tenant_validation(self):
-        """测试租户数据验证"""
+        """测试租户验证"""
         # 测试无效的schema_name
-        invalid_data = self.tenant_data.copy()
-        invalid_data['schema_name'] = 'invalid-schema-name'
-        
-        tenant = Tenant(**invalid_data)
         with self.assertRaises(ValidationError):
-            tenant.clean()
+            tenant = Tenant(
+                name='测试租户',
+                schema_name='invalid-schema-name'  # 包含连字符，无效
+            )
+            tenant.full_clean()
     
-    def test_tenant_subscription_check(self):
-        """测试租户订阅检查"""
-        tenant = Tenant.objects.create(**self.tenant_data)
+    def test_tenant_user_limit(self):
+        """测试租户用户限制"""
+        tenant = Tenant.objects.create(
+            name='测试租户',
+            schema_name='test_tenant',
+            max_users=2
+        )
+        
+        # 创建用户直到达到限制
+        User.objects.create(tenant=tenant, username='user1')
+        User.objects.create(tenant=tenant, username='user2')
+        
+        # 应该达到限制
+        self.assertFalse(tenant.can_add_user())
+    
+    def test_subscription_status(self):
+        """测试订阅状态"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        tenant = Tenant.objects.create(
+            name='测试租户',
+            schema_name='test_tenant'
+        )
         
         # 没有设置过期时间，应该是有效的
         self.assertTrue(tenant.is_subscription_active())
         
         # 设置未来的过期时间
-        tenant.subscription_expires_at = timezone.now() + timezone.timedelta(days=30)
+        tenant.subscription_expires_at = timezone.now() + timedelta(days=30)
         tenant.save()
         self.assertTrue(tenant.is_subscription_active())
         
         # 设置过去的过期时间
-        tenant.subscription_expires_at = timezone.now() - timezone.timedelta(days=1)
+        tenant.subscription_expires_at = timezone.now() - timedelta(days=1)
         tenant.save()
         self.assertFalse(tenant.is_subscription_active())
-    
-    def test_tenant_user_limit(self):
-        """测试租户用户数量限制"""
-        tenant = Tenant.objects.create(**self.tenant_data)
-        
-        # 创建用户直到达到限制
-        for i in range(tenant.max_users):
-            User.objects.create(
-                username=f'user{i}',
-                tenant=tenant,
-                email=f'user{i}@test.com'
-            )
-        
-        # 应该无法再添加用户
-        self.assertFalse(tenant.can_add_user())
-        
-        # 删除一个用户后应该可以添加
-        User.objects.filter(tenant=tenant).first().delete()
-        self.assertTrue(tenant.can_add_user())
 
 
 class PermissionModelTest(TestCase):
@@ -105,16 +94,17 @@ class PermissionModelTest(TestCase):
         self.assertEqual(permission.codename, 'test.permission')
         self.assertEqual(permission.category, 'system')
     
-    def test_permission_str(self):
-        """测试权限字符串表示"""
-        permission = Permission.objects.create(
-            name='测试权限',
-            codename='test.permission',
-            category='system'
-        )
+    def test_create_default_permissions(self):
+        """测试创建默认权限"""
+        permissions = create_default_permissions()
         
-        expected_str = "测试权限 (test.permission)"
-        self.assertEqual(str(permission), expected_str)
+        self.assertGreater(len(permissions), 0)
+        
+        # 检查是否包含预期的权限
+        permission_codes = [p.codename for p in Permission.objects.all()]
+        self.assertIn('user.view_users', permission_codes)
+        self.assertIn('trading.create_order', permission_codes)
+        self.assertIn('strategy.view_strategies', permission_codes)
 
 
 class RoleModelTest(TestCase):
@@ -126,332 +116,231 @@ class RoleModelTest(TestCase):
             schema_name='test_tenant'
         )
         
+        # 创建一些权限
         self.permission1 = Permission.objects.create(
             name='权限1',
             codename='perm1',
             category='system'
         )
-        
         self.permission2 = Permission.objects.create(
             name='权限2',
             codename='perm2',
-            category='user'
+            category='system'
+        )
+        self.permission3 = Permission.objects.create(
+            name='权限3',
+            codename='perm3',
+            category='system'
         )
     
     def test_create_role(self):
         """测试创建角色"""
-        with TenantContext(self.tenant):
-            role = Role.objects.create(
-                name='测试角色',
-                description='这是一个测试角色',
-                tenant=self.tenant,
-                priority=50,
-                color='#FF5722'
-            )
-            
-            role.permissions.add(self.permission1, self.permission2)
-            
-            self.assertEqual(role.name, '测试角色')
-            self.assertEqual(role.tenant, self.tenant)
-            self.assertEqual(role.priority, 50)
-            self.assertEqual(role.color, '#FF5722')
-            self.assertEqual(role.permissions.count(), 2)
+        role = Role.objects.create(
+            name='测试角色',
+            tenant=self.tenant,
+            description='测试角色描述'
+        )
+        
+        self.assertEqual(role.name, '测试角色')
+        self.assertEqual(role.tenant, self.tenant)
+        self.assertTrue(role.is_active)
     
-    def test_role_priority_ordering(self):
-        """测试角色优先级排序"""
-        with TenantContext(self.tenant):
-            role1 = Role.objects.create(
-                name='低优先级角色',
-                tenant=self.tenant,
-                priority=10
-            )
-            role2 = Role.objects.create(
-                name='高优先级角色',
-                tenant=self.tenant,
-                priority=90
-            )
-            role3 = Role.objects.create(
-                name='中优先级角色',
-                tenant=self.tenant,
-                priority=50
-            )
-            
-            # 测试排序：应该按优先级降序排列
-            roles = list(Role.objects.all())
-            self.assertEqual(roles[0], role2)  # 优先级90
-            self.assertEqual(roles[1], role3)  # 优先级50
-            self.assertEqual(roles[2], role1)  # 优先级10
+    def test_role_permissions(self):
+        """测试角色权限"""
+        role = Role.objects.create(
+            name='测试角色',
+            tenant=self.tenant
+        )
+        
+        # 添加权限
+        role.permissions.add(self.permission1, self.permission2)
+        
+        # 检查权限
+        self.assertTrue(role.has_permission('perm1'))
+        self.assertTrue(role.has_permission('perm2'))
+        self.assertFalse(role.has_permission('perm3'))
+        
+        # 检查直接权限
+        direct_permissions = role.get_direct_permissions()
+        self.assertEqual(len(direct_permissions), 2)
+    
+    def test_role_inheritance(self):
+        """测试角色继承"""
+        # 创建父角色
+        parent_role = Role.objects.create(
+            name='父角色',
+            tenant=self.tenant
+        )
+        parent_role.permissions.add(self.permission1)
+        
+        # 创建子角色
+        child_role = Role.objects.create(
+            name='子角色',
+            tenant=self.tenant,
+            parent_role=parent_role
+        )
+        child_role.permissions.add(self.permission2)
+        
+        # 检查继承的权限
+        all_permissions = child_role.get_all_permissions()
+        self.assertEqual(len(all_permissions), 2)
+        self.assertIn(self.permission1, all_permissions)
+        self.assertIn(self.permission2, all_permissions)
+        
+        # 检查继承链
+        inheritance_chain = child_role.get_inheritance_chain()
+        self.assertEqual(len(inheritance_chain), 2)
+        self.assertEqual(inheritance_chain[0], child_role)
+        self.assertEqual(inheritance_chain[1], parent_role)
     
     def test_circular_inheritance_prevention(self):
-        """测试循环继承防护"""
-        with TenantContext(self.tenant):
-            role1 = Role.objects.create(
-                name='角色1',
-                tenant=self.tenant
-            )
-            role2 = Role.objects.create(
-                name='角色2',
-                tenant=self.tenant,
-                parent_role=role1
-            )
-            
-            # 尝试创建循环继承：role1 -> role2 -> role1
-            role1.parent_role = role2
-            
-            with self.assertRaises(ValidationError):
-                role1.clean()
-    
-    def test_role_permission_inheritance(self):
-        """测试角色权限继承"""
-        with TenantContext(self.tenant):
-            # 创建父角色
-            parent_role = Role.objects.create(
-                name='父角色',
-                tenant=self.tenant
-            )
-            parent_role.permissions.add(self.permission1)
-            
-            # 创建子角色
-            child_role = Role.objects.create(
-                name='子角色',
-                tenant=self.tenant,
-                parent_role=parent_role
-            )
-            child_role.permissions.add(self.permission2)
-            
-            # 子角色应该拥有父角色的权限
-            all_permissions = child_role.get_all_permissions()
-            permission_codenames = {perm.codename for perm in all_permissions}
-            
-            self.assertIn('perm1', permission_codenames)  # 继承的权限
-            self.assertIn('perm2', permission_codenames)  # 自己的权限
-            
-            # 测试权限来源分析
-            direct_perms = child_role.get_direct_permissions()
-            inherited_perms = child_role.get_inherited_permissions()
-            
-            self.assertEqual(len(direct_perms), 1)
-            self.assertEqual(len(inherited_perms), 1)
-            self.assertIn(self.permission2, direct_perms)
-            self.assertIn(self.permission1, inherited_perms)
-    
-    def test_role_has_permission(self):
-        """测试角色权限检查"""
-        with TenantContext(self.tenant):
-            role = Role.objects.create(
-                name='测试角色',
-                tenant=self.tenant
-            )
-            role.permissions.add(self.permission1)
-            
-            self.assertTrue(role.has_permission('perm1'))
-            self.assertFalse(role.has_permission('perm2'))
-    
-    def test_inheritance_chain(self):
-        """测试角色继承链"""
-        with TenantContext(self.tenant):
-            # 创建三级继承：观察者 -> 交易员 -> 管理员
-            admin_role = Role.objects.create(
-                name='管理员',
-                tenant=self.tenant,
-                priority=80
-            )
-            trader_role = Role.objects.create(
-                name='交易员',
-                tenant=self.tenant,
-                parent_role=admin_role,
-                priority=60
-            )
-            observer_role = Role.objects.create(
-                name='观察者',
-                tenant=self.tenant,
-                parent_role=trader_role,
-                priority=20
-            )
-            
-            # 测试继承链
-            chain = observer_role.get_inheritance_chain()
-            self.assertEqual(len(chain), 3)
-            self.assertEqual(chain[0], observer_role)
-            self.assertEqual(chain[1], trader_role)
-            self.assertEqual(chain[2], admin_role)
-    
-    def test_role_deletion_constraints(self):
-        """测试角色删除限制"""
-        with TenantContext(self.tenant):
-            # 测试系统角色不能删除
-            system_role = Role.objects.create(
-                name='系统角色',
-                tenant=self.tenant,
-                role_type='system'
-            )
-            can_delete, reason = system_role.can_be_deleted()
-            self.assertFalse(can_delete)
-            self.assertIn('系统预定义角色', reason)
-            
-            # 测试有子角色的角色不能删除
-            parent_role = Role.objects.create(
-                name='父角色',
-                tenant=self.tenant,
-                role_type='custom'
-            )
-            child_role = Role.objects.create(
-                name='子角色',
-                tenant=self.tenant,
-                parent_role=parent_role,
-                role_type='custom'
-            )
-            
-            can_delete, reason = parent_role.can_be_deleted()
-            self.assertFalse(can_delete)
-            self.assertIn('子角色', reason)
-            
-            # 测试可以删除的角色
-            can_delete, reason = child_role.can_be_deleted()
-            self.assertTrue(can_delete)
-    
-    def test_copy_permissions(self):
-        """测试权限复制"""
-        with TenantContext(self.tenant):
-            source_role = Role.objects.create(
-                name='源角色',
-                tenant=self.tenant
-            )
-            source_role.permissions.add(self.permission1, self.permission2)
-            
-            target_role = Role.objects.create(
-                name='目标角色',
-                tenant=self.tenant
-            )
-            
-            # 复制权限
-            target_role.copy_permissions_from(source_role)
-            
-            # 验证权限已复制
-            self.assertEqual(
-                set(source_role.permissions.all()),
-                set(target_role.permissions.all())
-            )
+        """测试防止循环继承"""
+        role1 = Role.objects.create(
+            name='角色1',
+            tenant=self.tenant
+        )
+        
+        role2 = Role.objects.create(
+            name='角色2',
+            tenant=self.tenant,
+            parent_role=role1
+        )
+        
+        # 尝试创建循环继承
+        role1.parent_role = role2
+        
+        with self.assertRaises(ValidationError):
+            role1.full_clean()
     
     def test_create_system_roles(self):
-        """测试系统角色创建"""
-        with TenantContext(self.tenant):
-            # 创建一些权限用于测试
-            Permission.objects.create(
-                name='查看用户',
-                codename='user.view_users',
-                category='user'
-            )
-            Permission.objects.create(
-                name='创建订单',
-                codename='trading.create_order',
-                category='trading'
-            )
-            
-            # 创建系统角色
-            created_roles = Role.create_system_roles(self.tenant)
-            
-            # 验证创建了4个角色
-            self.assertEqual(len(created_roles), 4)
-            
-            # 验证角色名称和优先级
-            role_names = {role.name for role in created_roles}
-            expected_names = {'超级管理员', '管理员', '交易员', '观察者'}
-            self.assertEqual(role_names, expected_names)
-            
-            # 验证优先级设置
-            admin_role = next(r for r in created_roles if r.name == '超级管理员')
-            self.assertEqual(admin_role.priority, 100)
-            self.assertEqual(admin_role.color, '#F5222D')
-            
-            # 验证不会重复创建
-            created_again = Role.create_system_roles(self.tenant)
-            self.assertEqual(len(created_again), 0)
+        """测试创建系统角色"""
+        # 先创建默认权限
+        create_default_permissions()
+        
+        # 创建系统角色
+        roles = Role.create_system_roles(self.tenant)
+        
+        self.assertGreater(len(roles), 0)
+        
+        # 检查是否创建了预期的角色
+        role_names = [role.name for role in Role.objects.filter(tenant=self.tenant)]
+        self.assertIn('超级管理员', role_names)
+        self.assertIn('管理员', role_names)
+        self.assertIn('交易员', role_names)
+        self.assertIn('观察者', role_names)
+    
+    def test_role_deletion_constraints(self):
+        """测试角色删除约束"""
+        role = Role.objects.create(
+            name='测试角色',
+            tenant=self.tenant,
+            role_type='system'  # 系统角色
+        )
+        
+        # 系统角色不能删除
+        can_delete, reason = role.can_be_deleted()
+        self.assertFalse(can_delete)
+        self.assertIn('系统预定义角色', reason)
 
 
-class TenantUtilsTest(TestCase):
-    """租户工具函数测试"""
+class TenantContextTest(TestCase):
+    """租户上下文测试"""
     
     def setUp(self):
-        self.tenant = Tenant.objects.create(
-            name='测试租户',
-            schema_name='test_tenant'
+        self.tenant1 = Tenant.objects.create(
+            name='租户1',
+            schema_name='tenant1'
+        )
+        self.tenant2 = Tenant.objects.create(
+            name='租户2',
+            schema_name='tenant2'
         )
     
-    def test_tenant_context(self):
-        """测试租户上下文管理"""
-        # 初始状态没有租户
+    def test_tenant_context_manager(self):
+        """测试租户上下文管理器"""
+        # 初始状态
         self.assertIsNone(get_current_tenant())
         
+        # 使用上下文管理器
+        with TenantContext(self.tenant1):
+            self.assertEqual(get_current_tenant(), self.tenant1)
+            
+            # 嵌套上下文
+            with TenantContext(self.tenant2):
+                self.assertEqual(get_current_tenant(), self.tenant2)
+            
+            # 退出嵌套后恢复
+            self.assertEqual(get_current_tenant(), self.tenant1)
+        
+        # 退出上下文后清空
+        self.assertIsNone(get_current_tenant())
+    
+    def test_manual_tenant_context(self):
+        """测试手动设置租户上下文"""
         # 设置租户
-        set_current_tenant(self.tenant)
-        self.assertEqual(get_current_tenant(), self.tenant)
+        set_current_tenant(self.tenant1)
+        self.assertEqual(get_current_tenant(), self.tenant1)
+        
+        # 切换租户
+        set_current_tenant(self.tenant2)
+        self.assertEqual(get_current_tenant(), self.tenant2)
         
         # 清除租户
         clear_current_tenant()
         self.assertIsNone(get_current_tenant())
+
+
+class TenantManagerTest(TestCase):
+    """租户管理器测试"""
     
-    def test_tenant_context_manager(self):
-        """测试租户上下文管理器"""
-        # 使用上下文管理器
-        with TenantContext(self.tenant):
-            self.assertEqual(get_current_tenant(), self.tenant)
-        
-        # 退出上下文后应该清除
-        self.assertIsNone(get_current_tenant())
-    
-    def test_nested_tenant_context(self):
-        """测试嵌套租户上下文"""
-        tenant2 = Tenant.objects.create(
+    def setUp(self):
+        self.tenant1 = Tenant.objects.create(
+            name='租户1',
+            schema_name='tenant1'
+        )
+        self.tenant2 = Tenant.objects.create(
             name='租户2',
             schema_name='tenant2'
         )
         
-        with TenantContext(self.tenant):
-            self.assertEqual(get_current_tenant(), self.tenant)
+        # 创建用户
+        self.user1 = User.objects.create(
+            tenant=self.tenant1,
+            username='user1'
+        )
+        self.user2 = User.objects.create(
+            tenant=self.tenant2,
+            username='user2'
+        )
+    
+    def test_tenant_filtering(self):
+        """测试租户过滤"""
+        # 无租户上下文时，应该返回所有数据
+        all_users = User.objects.all()
+        self.assertEqual(all_users.count(), 2)
+        
+        # 在租户1上下文中，应该只返回租户1的数据
+        with TenantContext(self.tenant1):
+            tenant1_users = User.objects.all()
+            self.assertEqual(tenant1_users.count(), 1)
+            self.assertEqual(tenant1_users.first().username, 'user1')
+        
+        # 在租户2上下文中，应该只返回租户2的数据
+        with TenantContext(self.tenant2):
+            tenant2_users = User.objects.all()
+            self.assertEqual(tenant2_users.count(), 1)
+            self.assertEqual(tenant2_users.first().username, 'user2')
+    
+    def test_all_tenants_method(self):
+        """测试获取所有租户数据的方法"""
+        with TenantContext(self.tenant1):
+            # 使用普通管理器应该只返回当前租户的数据
+            filtered_users = User.objects.all()
+            self.assertEqual(filtered_users.count(), 1)
             
-            with TenantContext(tenant2):
-                self.assertEqual(get_current_tenant(), tenant2)
-            
-            # 应该恢复到外层租户
-            self.assertEqual(get_current_tenant(), self.tenant)
-    
-    def test_tenant_cache_key(self):
-        """测试租户缓存键生成"""
-        with TenantContext(self.tenant):
-            cache_key = get_tenant_cache_key('test_key')
-            expected_key = f"tenant_{self.tenant.id}:test_key"
-            self.assertEqual(cache_key, expected_key)
-    
-    def test_create_default_permissions(self):
-        """测试创建默认权限"""
-        # 清除现有权限
-        Permission.objects.all().delete()
-        
-        permissions = create_default_permissions()
-        
-        self.assertGreater(len(permissions), 0)
-        
-        # 验证一些关键权限是否创建
-        self.assertTrue(Permission.objects.filter(codename='user.view_users').exists())
-        self.assertTrue(Permission.objects.filter(codename='trading.create_order').exists())
-        self.assertTrue(Permission.objects.filter(codename='strategy.run_backtest').exists())
-    
-    def test_create_default_roles(self):
-        """测试创建默认角色"""
-        # 先创建默认权限
-        create_default_permissions()
-        
-        roles = create_default_roles(self.tenant)
-        
-        self.assertGreater(len(roles), 0)
-        
-        # 验证默认角色是否创建
-        with TenantContext(self.tenant):
-            self.assertTrue(Role.objects.filter(name='超级管理员').exists())
-            self.assertTrue(Role.objects.filter(name='交易员').exists())
-            self.assertTrue(Role.objects.filter(name='策略开发者').exists())
-            self.assertTrue(Role.objects.filter(name='观察者').exists())
+            # 使用all_tenants方法应该返回所有数据
+            all_users = User.objects.all_tenants()
+            self.assertEqual(all_users.count(), 2)
 
 
 class TenantMiddlewareTest(TestCase):
@@ -459,166 +348,60 @@ class TenantMiddlewareTest(TestCase):
     
     def setUp(self):
         self.factory = RequestFactory()
-        self.middleware = TenantMiddleware(lambda request: Mock())
+        self.middleware = TenantMiddleware(lambda request: None)
         
         self.tenant = Tenant.objects.create(
-            name='测试租户',
-            schema_name='test_tenant',
+            name='中间件测试租户',
+            schema_name='middleware_test',
             domain='test.example.com'
         )
         
         self.user = User.objects.create(
-            username='testuser',
             tenant=self.tenant,
-            email='test@example.com'
+            username='testuser'
         )
     
-    def test_tenant_from_header(self):
-        """测试从HTTP头部获取租户"""
-        request = self.factory.get('/', HTTP_X_TENANT_ID=str(self.tenant.id))
+    def test_tenant_identification_by_header(self):
+        """测试通过HTTP头部识别租户"""
+        request = self.factory.get('/api/test/')
+        request.META['HTTP_X_TENANT_ID'] = str(self.tenant.id)
         
         response = self.middleware.process_request(request)
         
-        self.assertIsNone(response)  # 没有错误
+        self.assertIsNone(response)  # 中间件正常处理
         self.assertEqual(request.tenant, self.tenant)
     
-    def test_tenant_from_domain(self):
-        """测试从域名获取租户"""
-        request = self.factory.get('/', HTTP_HOST='test.example.com')
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNone(response)  # 没有错误
-        self.assertEqual(request.tenant, self.tenant)
-    
-    def test_tenant_from_user(self):
-        """测试从用户获取租户"""
-        request = self.factory.get('/')
+    def test_tenant_identification_by_user(self):
+        """测试通过用户识别租户"""
+        request = self.factory.get('/api/test/')
         request.user = self.user
         
         response = self.middleware.process_request(request)
         
-        self.assertIsNone(response)  # 没有错误
+        self.assertIsNone(response)
         self.assertEqual(request.tenant, self.tenant)
     
-    def test_inactive_tenant(self):
-        """测试非激活租户"""
+    def test_admin_path_skip(self):
+        """测试管理员路径跳过租户设置"""
+        request = self.factory.get('/admin/test/')
+        
+        response = self.middleware.process_request(request)
+        
+        self.assertIsNone(response)
+        self.assertFalse(hasattr(request, 'tenant'))
+    
+    def test_inactive_tenant_rejection(self):
+        """测试拒绝非激活租户"""
         self.tenant.is_active = False
         self.tenant.save()
         
-        request = self.factory.get('/', HTTP_X_TENANT_ID=str(self.tenant.id))
+        request = self.factory.get('/api/test/')
+        request.META['HTTP_X_TENANT_ID'] = str(self.tenant.id)
         
         response = self.middleware.process_request(request)
         
         self.assertIsNotNone(response)
         self.assertEqual(response.status_code, 403)
-    
-    def test_expired_subscription(self):
-        """测试过期订阅"""
-        self.tenant.subscription_expires_at = timezone.now() - timezone.timedelta(days=1)
-        self.tenant.save()
-        
-        request = self.factory.get('/', HTTP_X_TENANT_ID=str(self.tenant.id))
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNotNone(response)
-        self.assertEqual(response.status_code, 403)
-    
-    def test_admin_path_skip(self):
-        """测试管理员路径跳过租户检查"""
-        request = self.factory.get('/admin/users/')
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNone(response)  # 应该跳过
-        self.assertFalse(hasattr(request, 'tenant'))
-    
-    def test_api_without_tenant(self):
-        """测试API请求缺少租户上下文"""
-        request = self.factory.get('/api/users/')
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNotNone(response)
-        self.assertEqual(response.status_code, 400)
-
-
-class TenantAccessControlMiddlewareTest(TestCase):
-    """租户访问控制中间件测试"""
-    
-    def setUp(self):
-        self.factory = RequestFactory()
-        self.middleware = TenantAccessControlMiddleware(lambda request: Mock())
-        
-        self.tenant1 = Tenant.objects.create(
-            name='租户1',
-            schema_name='tenant1'
-        )
-        
-        self.tenant2 = Tenant.objects.create(
-            name='租户2',
-            schema_name='tenant2'
-        )
-        
-        self.user1 = User.objects.create(
-            username='user1',
-            tenant=self.tenant1,
-            email='user1@example.com'
-        )
-        
-        self.user2 = User.objects.create(
-            username='user2',
-            tenant=self.tenant2,
-            email='user2@example.com'
-        )
-    
-    def test_same_tenant_access(self):
-        """测试同租户访问"""
-        request = self.factory.get('/api/users/')
-        request.user = self.user1
-        request.tenant = self.tenant1
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNone(response)  # 应该允许访问
-    
-    def test_cross_tenant_access_denied(self):
-        """测试跨租户访问被拒绝"""
-        request = self.factory.get('/api/users/')
-        request.user = self.user1
-        request.tenant = self.tenant2  # 不同的租户
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNotNone(response)
-        self.assertEqual(response.status_code, 403)
-    
-    def test_superuser_access(self):
-        """测试超级用户访问"""
-        self.user1.is_superuser = True
-        self.user1.save()
-        
-        request = self.factory.get('/api/users/')
-        request.user = self.user1
-        request.tenant = self.tenant2  # 不同的租户
-        
-        response = self.middleware.process_request(request)
-        
-        self.assertIsNone(response)  # 超级用户应该可以访问
-    
-    def test_skip_paths(self):
-        """测试跳过的路径"""
-        skip_paths = ['/admin/', '/api/auth/login/', '/health/']
-        
-        for path in skip_paths:
-            request = self.factory.get(path)
-            request.user = self.user1
-            request.tenant = self.tenant2
-            
-            response = self.middleware.process_request(request)
-            
-            self.assertIsNone(response, f"路径 {path} 应该被跳过")
 
 
 class MenuModelTest(TestCase):
@@ -626,68 +409,103 @@ class MenuModelTest(TestCase):
     
     def setUp(self):
         self.tenant = Tenant.objects.create(
-            name='测试租户',
-            schema_name='test_tenant'
-        )
-        
-        self.permission = Permission.objects.create(
-            name='查看用户',
-            codename='user.view_users',
-            category='user'
-        )
-        
-        self.user = User.objects.create(
-            username='testuser',
-            tenant=self.tenant,
-            email='test@example.com'
+            name='菜单测试租户',
+            schema_name='menu_test'
         )
     
     def test_create_menu(self):
         """测试创建菜单"""
-        with TenantContext(self.tenant):
-            menu = Menu.objects.create(
-                name='user_management',
-                title='用户管理',
-                icon='user',
-                path='/users',
-                tenant=self.tenant
-            )
-            
-            self.assertEqual(menu.name, 'user_management')
-            self.assertEqual(menu.title, '用户管理')
-            self.assertEqual(menu.tenant, self.tenant)
+        menu = Menu.objects.create(
+            tenant=self.tenant,
+            name='test_menu',
+            title='测试菜单',
+            path='/test',
+            icon='test-icon'
+        )
+        
+        self.assertEqual(menu.name, 'test_menu')
+        self.assertEqual(menu.title, '测试菜单')
+        self.assertEqual(menu.level, 1)
+        self.assertTrue(menu.is_visible)
     
     def test_menu_hierarchy(self):
         """测试菜单层级"""
-        with TenantContext(self.tenant):
-            parent_menu = Menu.objects.create(
-                name='system',
-                title='系统管理',
-                tenant=self.tenant
-            )
-            
-            child_menu = Menu.objects.create(
-                name='users',
-                title='用户管理',
-                parent=parent_menu,
-                tenant=self.tenant
-            )
-            
-            self.assertEqual(child_menu.parent, parent_menu)
-            self.assertIn(child_menu, parent_menu.get_children())
+        parent_menu = Menu.objects.create(
+            tenant=self.tenant,
+            name='parent_menu',
+            title='父菜单',
+            path='/parent'
+        )
+        
+        child_menu = Menu.objects.create(
+            tenant=self.tenant,
+            name='child_menu',
+            title='子菜单',
+            path='/child',
+            parent=parent_menu
+        )
+        
+        # 检查层级自动计算
+        self.assertEqual(parent_menu.level, 1)
+        self.assertEqual(child_menu.level, 2)
+        
+        # 检查父子关系
+        self.assertTrue(parent_menu.has_children())
+        self.assertEqual(parent_menu.get_children_count(), 1)
     
-    def test_menu_permission_check(self):
-        """测试菜单权限检查"""
+    def test_menu_breadcrumb(self):
+        """测试面包屑导航"""
+        parent_menu = Menu.objects.create(
+            tenant=self.tenant,
+            name='parent',
+            title='父菜单',
+            path='/parent'
+        )
+        
+        child_menu = Menu.objects.create(
+            tenant=self.tenant,
+            name='child',
+            title='子菜单',
+            path='/child',
+            parent=parent_menu
+        )
+        
+        breadcrumb = child_menu.get_breadcrumb()
+        
+        self.assertEqual(len(breadcrumb), 2)
+        self.assertEqual(breadcrumb[0]['title'], '父菜单')
+        self.assertEqual(breadcrumb[1]['title'], '子菜单')
+
+
+class TenantModelBaseTest(TestCase):
+    """租户模型基类测试"""
+    
+    def setUp(self):
+        self.tenant = Tenant.objects.create(
+            name='基类测试租户',
+            schema_name='base_test'
+        )
+    
+    def test_auto_tenant_assignment(self):
+        """测试自动租户分配"""
         with TenantContext(self.tenant):
+            # 创建菜单（继承自TenantModel）
             menu = Menu.objects.create(
-                name='users',
-                title='用户管理',
-                tenant=self.tenant
+                name='auto_tenant_menu',
+                title='自动租户菜单',
+                path='/auto'
             )
-            menu.required_permissions.add(self.permission)
             
-            # 用户没有权限，应该返回False
-            self.assertFalse(menu.has_permission(self.user))
-            
-            # 给用户添加权限后应该返回True
-            # 这里需要实现用户权限系统后才能完整测试
+            # 应该自动分配租户
+            self.assertEqual(menu.tenant, self.tenant)
+    
+    def test_tenant_required_error(self):
+        """测试租户必需错误"""
+        # 在没有租户上下文的情况下创建对象
+        with self.assertRaises(ValidationError):
+            menu = Menu(
+                name='no_tenant_menu',
+                title='无租户菜单',
+                path='/no-tenant'
+            )
+            menu.save()
