@@ -261,19 +261,25 @@ const Sidebar: React.FC = () => {
 
   /**
    * 处理鼠标进入悬浮子菜单的事件
-   * 保持子菜单显示
+   * 清除延迟隐藏定时器，保持子菜单显示
    */
   const handleSubmenuEnter = () => {
-    // 悬浮菜单不再自动隐藏，无需处理定时器
+    // 鼠标进入悬浮菜单时清除延迟隐藏定时器
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
   };
 
   /**
    * 处理鼠标离开悬浮子菜单的事件
-   * 不自动隐藏，只有点击才隐藏
+   * 延迟隐藏悬浮菜单
    */
   const handleSubmenuLeave = () => {
-    // 不再自动隐藏悬浮菜单
-    // 悬浮菜单只有在点击时才隐藏
+    // 鼠标离开悬浮菜单时延迟隐藏
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredSubmenu(null);
+    }, 300);
   };
 
   // 点击外部区域隐藏悬浮菜单
@@ -294,6 +300,7 @@ const Sidebar: React.FC = () => {
       document.removeEventListener('click', handleClickOutside);
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
       }
     };
   }, [hoveredSubmenu]);

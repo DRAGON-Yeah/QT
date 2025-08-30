@@ -88,22 +88,22 @@
                 transition: all 0.2s ease;
               }
               
-              // 添加右侧指示器，暗示有子菜单
-              &::after {
-                content: '›';
-                position: absolute;
-                right: 8px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: rgba(255, 255, 255, 0.6);
-                font-size: 16px;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-              }
+              // 移除右侧箭头指示器，改为通过悬浮菜单来显示子菜单
+              // &::after {
+              //   content: '›';
+              //   position: absolute;
+              //   right: 8px;
+              //   top: 50%;
+              //   transform: translateY(-50%);
+              //   color: rgba(255, 255, 255, 0.6);
+              //   font-size: 16px;
+              //   opacity: 0;
+              //   transition: opacity 0.2s ease;
+              // }
               
-              &:hover::after {
-                opacity: 1;
-              }
+              // &:hover::after {
+              //   opacity: 1;
+              // }
             }
           }
         }
