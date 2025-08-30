@@ -153,19 +153,65 @@ export const PERMISSIONS = {
   SYSTEM_CONFIG: 'system.config',
 } as const;
 
-// 路由路径
+/**
+ * 路由路径常量 - 重新设计的菜单结构
+ * 
+ * 新的路由结构按功能模块进行分组，提供更清晰的导航层次：
+ * - 基础路由：登录、仪表盘等核心页面
+ * - 账户管理：用户、角色、交易所账户管理
+ * - 交易中心：现货交易、订单管理、持仓管理等
+ * - 策略管理：策略开发、回测、监控、风控
+ * - 数据分析：市场分析、绩效分析、风险分析、报告
+ * - 系统设置：菜单管理、系统监控、数据库管理等
+ */
 export const ROUTES = {
-  LOGIN: '/login',
-  DASHBOARD: '/dashboard',
-  USERS: '/users',
-  MENUS: '/menus',
-  EXCHANGES: '/exchanges',
-  TRADING: '/trading',
-  STRATEGIES: '/strategies',
-  MARKET: '/market',
-  RISK: '/risk',
-  SYSTEM: '/system',
-  PROFILE: '/profile',
+  // 基础路由 - 系统核心页面
+  LOGIN: '/login',                    // 用户登录页面
+  DASHBOARD: '/dashboard',            // 系统仪表盘
+  
+  // 账户管理模块 - 用户和权限相关功能
+  ACCOUNT: '/account',                // 账户管理主页
+  ACCOUNT_USERS: '/account/users',    // 用户管理页面
+  ACCOUNT_ROLES: '/account/roles',    // 角色权限管理
+  ACCOUNT_EXCHANGES: '/account/exchanges', // 交易所账户配置
+  
+  // 交易中心模块 - 交易相关功能
+  TRADING: '/trading',                // 交易中心主页
+  TRADING_SPOT: '/trading/spot',      // 现货交易界面
+  TRADING_ORDERS: '/trading/orders',  // 订单管理页面
+  TRADING_POSITIONS: '/trading/positions', // 持仓管理页面
+  TRADING_HISTORY: '/trading/history', // 交易历史记录
+  
+  // 策略管理模块 - 量化策略相关功能
+  STRATEGY: '/strategy',              // 策略管理主页
+  STRATEGY_LIST: '/strategy/list',    // 策略列表页面
+  STRATEGY_BACKTEST: '/strategy/backtest', // 策略回测页面
+  STRATEGY_MONITOR: '/strategy/monitor',   // 策略监控页面
+  STRATEGY_RISK: '/strategy/risk',    // 策略风险控制
+  
+  // 数据分析模块 - 数据分析和报告功能
+  ANALYSIS: '/analysis',              // 数据分析主页
+  ANALYSIS_MARKET: '/analysis/market', // 市场数据分析
+  ANALYSIS_PERFORMANCE: '/analysis/performance', // 绩效分析页面
+  ANALYSIS_RISK: '/analysis/risk',    // 风险分析页面
+  ANALYSIS_REPORTS: '/analysis/reports', // 分析报告页面
+  
+  // 系统设置模块 - 系统管理和配置功能
+  SYSTEM: '/system',                  // 系统设置主页
+  SYSTEM_MENUS: '/system/menus',      // 菜单管理页面
+  SYSTEM_MONITOR: '/system/monitor',  // 系统监控页面
+  SYSTEM_DATABASE: '/system/database', // 数据库管理页面
+  SYSTEM_LOGS: '/system/logs',        // 系统日志页面
+  SYSTEM_CONFIG: '/system/config',    // 系统配置页面
+  
+  // 兼容旧路由（逐步废弃）- 为了向后兼容保留的旧路由映射
+  USERS: '/account/users',            // 旧用户管理路由，重定向到新路由
+  MENUS: '/system/menus',             // 旧菜单管理路由，重定向到新路由
+  EXCHANGES: '/account/exchanges',    // 旧交易所管理路由，重定向到新路由
+  STRATEGIES: '/strategy/list',       // 旧策略管理路由，重定向到新路由
+  MARKET: '/analysis/market',         // 旧市场数据路由，重定向到新路由
+  RISK: '/strategy/risk',             // 旧风险管理路由，重定向到新路由
+  PROFILE: '/profile',                // 用户个人资料页面
 } as const;
 
 // 本地存储键名

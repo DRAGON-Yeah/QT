@@ -39,12 +39,25 @@ class Command(BaseCommand):
         )
 
     def create_menus(self, tenant):
-        """创建菜单数据"""
+        """
+        创建菜单数据 - 重新设计的二级菜单结构
         
-        # 清除现有菜单
+        本方法为指定租户创建完整的菜单体系，包括：
+        - 6个一级菜单：仪表盘、账户管理、交易中心、策略管理、数据分析、系统设置
+        - 每个一级菜单下包含相应的二级菜单项
+        - 菜单结构遵循量化交易平台的业务逻辑
+        
+        Args:
+            tenant: 租户对象，用于多租户数据隔离
+        """
+        
+        # 清除现有菜单数据，确保重新初始化时的数据一致性
         Menu.objects.filter(tenant=tenant).delete()
         
-        # 创建主菜单
+        # ==================== 一级菜单创建 ====================
+        # 按照业务重要性和使用频率排序
+        
+        # 1. 仪表盘
         dashboard = Menu.objects.create(
             tenant=tenant,
             name='dashboard',
@@ -59,29 +72,83 @@ class Command(BaseCommand):
             meta_info={'keepAlive': True}
         )
         
-        # 用户管理
-        user_management = Menu.objects.create(
+        # 2. 账户管理
+        account_management = Menu.objects.create(
             tenant=tenant,
-            name='user_management',
-            title='用户管理',
-            icon='fas fa-users',
-            path='/users',
-            component='UserManagement/index',
+            name='account_management',
+            title='账户管理',
+            icon='fas fa-user-cog',
+            path='/account',
             menu_type='menu',
             sort_order=2,
             is_visible=True,
             is_enabled=True
         )
         
-        # 用户管理子菜单
+        # 3. 交易中心
+        trading_center = Menu.objects.create(
+            tenant=tenant,
+            name='trading_center',
+            title='交易中心',
+            icon='fas fa-chart-line',
+            path='/trading',
+            menu_type='menu',
+            sort_order=3,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        # 4. 策略管理
+        strategy_management = Menu.objects.create(
+            tenant=tenant,
+            name='strategy_management',
+            title='策略管理',
+            icon='fas fa-brain',
+            path='/strategy',
+            menu_type='menu',
+            sort_order=4,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        # 5. 数据分析
+        data_analysis = Menu.objects.create(
+            tenant=tenant,
+            name='data_analysis',
+            title='数据分析',
+            icon='fas fa-chart-bar',
+            path='/analysis',
+            menu_type='menu',
+            sort_order=5,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        # 6. 系统设置
+        system_settings = Menu.objects.create(
+            tenant=tenant,
+            name='system_settings',
+            title='系统设置',
+            icon='fas fa-cogs',
+            path='/system',
+            menu_type='menu',
+            sort_order=6,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        # ==================== 二级菜单创建 ====================
+        # 为每个一级菜单创建对应的功能子菜单
+        
+        # 账户管理子菜单 - 用户、角色、交易账户管理
         Menu.objects.create(
             tenant=tenant,
             name='user_list',
-            title='用户列表',
-            icon='fas fa-user',
-            path='/users/list',
-            component='UserManagement/UserList',
-            parent=user_management,
+            title='用户管理',
+            icon='fas fa-users',
+            path='/account/users',
+            component='UserManagement/index',
+            parent=account_management,
             menu_type='menu',
             sort_order=1,
             is_visible=True,
@@ -91,53 +158,97 @@ class Command(BaseCommand):
         Menu.objects.create(
             tenant=tenant,
             name='role_management',
-            title='角色管理',
-            icon='fas fa-user-tag',
-            path='/users/roles',
+            title='角色权限',
+            icon='fas fa-user-shield',
+            path='/account/roles',
             component='UserManagement/RoleManagement',
-            parent=user_management,
+            parent=account_management,
             menu_type='menu',
             sort_order=2,
             is_visible=True,
             is_enabled=True
         )
         
-        # 菜单管理
-        menu_management = Menu.objects.create(
+        Menu.objects.create(
             tenant=tenant,
-            name='menu_management',
-            title='菜单管理',
-            icon='fas fa-bars',
-            path='/menus',
-            component='MenuManagement/index',
+            name='exchange_accounts',
+            title='交易账户',
+            icon='fas fa-wallet',
+            path='/account/exchanges',
+            component='ExchangeAccount/index',
+            parent=account_management,
             menu_type='menu',
             sort_order=3,
             is_visible=True,
             is_enabled=True
         )
         
-        # 交易管理
-        trading = Menu.objects.create(
+        # 交易中心子菜单 - 现货交易、订单管理、持仓管理、交易历史
+        Menu.objects.create(
             tenant=tenant,
-            name='trading',
-            title='交易管理',
-            icon='fas fa-exchange-alt',
-            path='/trading',
+            name='spot_trading',
+            title='现货交易',
+            icon='fas fa-coins',
+            path='/trading/spot',
+            component='Trading/SpotTrading',
+            parent=trading_center,
+            menu_type='menu',
+            sort_order=1,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='order_management',
+            title='订单管理',
+            icon='fas fa-list-alt',
+            path='/trading/orders',
+            component='Trading/OrderManagement',
+            parent=trading_center,
+            menu_type='menu',
+            sort_order=2,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='position_management',
+            title='持仓管理',
+            icon='fas fa-briefcase',
+            path='/trading/positions',
+            component='Trading/PositionManagement',
+            parent=trading_center,
+            menu_type='menu',
+            sort_order=3,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='trade_history',
+            title='交易历史',
+            icon='fas fa-history',
+            path='/trading/history',
+            component='Trading/TradeHistory',
+            parent=trading_center,
             menu_type='menu',
             sort_order=4,
             is_visible=True,
             is_enabled=True
         )
         
-        # 交易管理子菜单
+        # 策略管理子菜单 - 策略列表、回测、监控、风险控制
         Menu.objects.create(
             tenant=tenant,
-            name='exchanges',
-            title='交易所管理',
-            icon='fas fa-building',
-            path='/trading/exchanges',
-            component='Exchanges/index',
-            parent=trading,
+            name='strategy_list',
+            title='策略列表',
+            icon='fas fa-list',
+            path='/strategy/list',
+            component='Strategy/StrategyList',
+            parent=strategy_management,
             menu_type='menu',
             sort_order=1,
             is_visible=True,
@@ -146,82 +257,55 @@ class Command(BaseCommand):
         
         Menu.objects.create(
             tenant=tenant,
-            name='orders',
-            title='订单管理',
-            icon='fas fa-list-alt',
-            path='/trading/orders',
-            component='Trading/index',
-            parent=trading,
+            name='strategy_backtest',
+            title='策略回测',
+            icon='fas fa-flask',
+            path='/strategy/backtest',
+            component='Strategy/Backtest',
+            parent=strategy_management,
             menu_type='menu',
             sort_order=2,
             is_visible=True,
             is_enabled=True
         )
         
-        # 策略管理
-        strategies = Menu.objects.create(
-            tenant=tenant,
-            name='strategies',
-            title='策略管理',
-            icon='fas fa-chart-line',
-            path='/strategies',
-            component='Strategies/index',
-            menu_type='menu',
-            sort_order=5,
-            is_visible=True,
-            is_enabled=True
-        )
-        
-        # 市场数据
-        market = Menu.objects.create(
-            tenant=tenant,
-            name='market',
-            title='市场数据',
-            icon='fas fa-chart-bar',
-            path='/market',
-            component='Market/index',
-            menu_type='menu',
-            sort_order=6,
-            is_visible=True,
-            is_enabled=True
-        )
-        
-        # 风险控制
-        risk = Menu.objects.create(
-            tenant=tenant,
-            name='risk',
-            title='风险控制',
-            icon='fas fa-shield-alt',
-            path='/risk',
-            component='Risk/index',
-            menu_type='menu',
-            sort_order=7,
-            is_visible=True,
-            is_enabled=True
-        )
-        
-        # 系统管理
-        system = Menu.objects.create(
-            tenant=tenant,
-            name='system',
-            title='系统管理',
-            icon='fas fa-cogs',
-            path='/system',
-            menu_type='menu',
-            sort_order=8,
-            is_visible=True,
-            is_enabled=True
-        )
-        
-        # 系统管理子菜单
         Menu.objects.create(
             tenant=tenant,
-            name='monitoring',
-            title='系统监控',
-            icon='fas fa-desktop',
-            path='/system/monitoring',
-            component='System/index',
-            parent=system,
+            name='strategy_monitor',
+            title='策略监控',
+            icon='fas fa-eye',
+            path='/strategy/monitor',
+            component='Strategy/Monitor',
+            parent=strategy_management,
+            menu_type='menu',
+            sort_order=3,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='risk_control',
+            title='风险控制',
+            icon='fas fa-shield-alt',
+            path='/strategy/risk',
+            component='Strategy/RiskControl',
+            parent=strategy_management,
+            menu_type='menu',
+            sort_order=4,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        # 数据分析子菜单 - 市场行情、收益分析、风险分析、报表中心
+        Menu.objects.create(
+            tenant=tenant,
+            name='market_data',
+            title='市场行情',
+            icon='fas fa-chart-area',
+            path='/analysis/market',
+            component='Analysis/MarketData',
+            parent=data_analysis,
             menu_type='menu',
             sort_order=1,
             is_visible=True,
@@ -230,14 +314,113 @@ class Command(BaseCommand):
         
         Menu.objects.create(
             tenant=tenant,
-            name='database',
+            name='performance_analysis',
+            title='收益分析',
+            icon='fas fa-chart-pie',
+            path='/analysis/performance',
+            component='Analysis/Performance',
+            parent=data_analysis,
+            menu_type='menu',
+            sort_order=2,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='risk_analysis',
+            title='风险分析',
+            icon='fas fa-exclamation-triangle',
+            path='/analysis/risk',
+            component='Analysis/RiskAnalysis',
+            parent=data_analysis,
+            menu_type='menu',
+            sort_order=3,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='reports',
+            title='报表中心',
+            icon='fas fa-file-alt',
+            path='/analysis/reports',
+            component='Analysis/Reports',
+            parent=data_analysis,
+            menu_type='menu',
+            sort_order=4,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        # 系统设置子菜单 - 菜单管理、系统监控、数据库管理、日志、配置
+        Menu.objects.create(
+            tenant=tenant,
+            name='menu_management',
+            title='菜单管理',
+            icon='fas fa-bars',
+            path='/system/menus',
+            component='MenuManagement/index',
+            parent=system_settings,
+            menu_type='menu',
+            sort_order=1,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='system_monitor',
+            title='系统监控',
+            icon='fas fa-desktop',
+            path='/system/monitor',
+            component='System/Monitor',
+            parent=system_settings,
+            menu_type='menu',
+            sort_order=2,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='database_management',
             title='数据库管理',
             icon='fas fa-database',
             path='/system/database',
             component='Database/index',
-            parent=system,
+            parent=system_settings,
             menu_type='menu',
-            sort_order=2,
+            sort_order=3,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='system_logs',
+            title='系统日志',
+            icon='fas fa-file-text',
+            path='/system/logs',
+            component='System/Logs',
+            parent=system_settings,
+            menu_type='menu',
+            sort_order=4,
+            is_visible=True,
+            is_enabled=True
+        )
+        
+        Menu.objects.create(
+            tenant=tenant,
+            name='system_config',
+            title='系统配置',
+            icon='fas fa-sliders-h',
+            path='/system/config',
+            component='System/Config',
+            parent=system_settings,
+            menu_type='menu',
+            sort_order=5,
             is_visible=True,
             is_enabled=True
         )
