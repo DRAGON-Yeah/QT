@@ -26,20 +26,20 @@ export default defineConfig({
     proxy: {
       // API 请求代理到 Django 后端
       '/api': {
-        target: 'http://backend:8000',  // Docker 容器内的后端服务地址
-        changeOrigin: true,             // 修改请求头中的 origin 字段
-        secure: false,                  // 不验证 SSL 证书（开发环境）
+        target: 'http://localhost:8000',  // 本地开发环境的后端服务地址
+        changeOrigin: true,               // 修改请求头中的 origin 字段
+        secure: false,                    // 不验证 SSL 证书（开发环境）
       },
       // Django 管理后台代理
       '/admin': {
-        target: 'http://backend:8000',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
       },
       // WebSocket 连接代理（用于实时数据推送）
       '/ws': {
-        target: 'ws://backend:8000',    // WebSocket 协议
-        ws: true,                       // 启用 WebSocket 代理
+        target: 'ws://localhost:8000',    // WebSocket 协议
+        ws: true,                         // 启用 WebSocket 代理
         changeOrigin: true,
       },
     },

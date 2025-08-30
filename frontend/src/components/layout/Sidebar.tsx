@@ -14,6 +14,9 @@ import {
   SafetyOutlined,
   SettingOutlined,
   UserOutlined,
+  TeamOutlined,
+  ProfileOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '@/store';
 import { useResponsive } from '@/hooks';
@@ -34,6 +37,16 @@ const Sidebar: React.FC = () => {
       key: ROUTES.DASHBOARD,
       icon: <DashboardOutlined />,
       label: '仪表盘',
+    },
+    {
+      key: ROUTES.USERS,
+      icon: <TeamOutlined />,
+      label: '用户管理',
+    },
+    {
+      key: ROUTES.MENUS,
+      icon: <MenuOutlined />,
+      label: '菜单管理',
     },
     {
       key: ROUTES.EXCHANGES,
@@ -67,7 +80,7 @@ const Sidebar: React.FC = () => {
     },
     {
       key: ROUTES.PROFILE,
-      icon: <UserOutlined />,
+      icon: <ProfileOutlined />,
       label: '个人中心',
     },
   ];

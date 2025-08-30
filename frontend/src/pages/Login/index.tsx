@@ -44,48 +44,35 @@ const LoginPage: React.FC = () => {
   // 获取登录成功后的重定向路径，默认跳转到仪表盘
   const from = (location.state as any)?.from || ROUTES.DASHBOARD;
 
+  /**
+   * 处理登录表单提交
+   * 
+   * @param values - 表单数据，包含用户名和密码
+   */
   const handleSubmit = async (values: LoginForm) => {
     try {
+      // 设置加载状态
       setLoading(true);
 
-      // TODO: 调用登录API
-      // const response = await authService.login(values);
+      // 调用真实的登录API
+      const { authService } = await import('@/services/authService');
+      const response = await authService.login(values);
 
-      // 模拟登录成功
-      const mockUser = {
-        id: 1,
-        username: values.username,
-        email: `${values.username}@example.com`,
-        tenant: {
-          id: 1,
-          name: '测试租户',
-          schemaName: 'tenant_1',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-        },
-        roles: [
-          {
-            id: 1,
-            name: '管理员',
-            permissions: [
-              { id: 1, name: '用户管理', codename: 'users.manage' },
-              { id: 2, name: '交易管理', codename: 'trading.manage' },
-            ],
-          },
-        ],
-        permissions: ['users.manage', 'trading.manage'],
-        isActive: true,
-      };
-
-      const mockToken = 'mock-jwt-token';
-
-      login(mockUser, mockToken);
+      // 更新全局认证状态
+      login(response.user, response.access_token);
+      
+      // 显示成功提示
       message.success('登录成功');
+      
+      // 跳转到目标页面，使用replace避免返回到登录页
       navigate(from, { replace: true });
 
     } catch (error) {
-      message.error('登录失败，请检查用户名和密码');
+      // 登录失败处理
+      const errorMessage = error instanceof Error ? error.message : '登录失败，请检查用户名和密码';
+      message.error(errorMessage);
     } finally {
+      // 无论成功失败都要清除加载状态
       setLoading(false);
     }
   };
@@ -93,11 +80,13 @@ const LoginPage: React.FC = () => {
   return (
     <div className="login-page">
       <div className="login-container">
+        {/* 登录页面头部 - 品牌标识和标题 */}
         <div className="login-header">
           <h1 className="login-title">QuantTrade</h1>
           <p className="login-subtitle">量化交易平台</p>
         </div>
 
+        {/* 登录表单卡片容器 */}
         <Card className="login-card">
           <Form
             form={form}
@@ -106,6 +95,7 @@ const LoginPage: React.FC = () => {
             autoComplete="off"
             size="large"
           >
+            {/* 用户名输入框 - 支持自动完成 */}
             <Form.Item
               name="username"
               rules={[
@@ -120,6 +110,7 @@ const LoginPage: React.FC = () => {
               />
             </Form.Item>
 
+            {/* 密码输入框 - 自动隐藏输入内容 */}
             <Form.Item
               name="password"
               rules={[
@@ -134,6 +125,7 @@ const LoginPage: React.FC = () => {
               />
             </Form.Item>
 
+            {/* 登录提交按钮 - 全宽度显示 */}
             <Form.Item>
               <Button
                 type="primary"
@@ -147,8 +139,9 @@ const LoginPage: React.FC = () => {
           </Form>
         </Card>
 
+        {/* 页面底部版权信息 */}
         <div className="login-footer">
-          <p>© 2025~2035 QuantTrade. All rights reserved.</p>
+          <p>© 2025 QuantTrade. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -3,3 +3,4 @@
  */
 
 export { useResponsive, useMediaQuery, useBreakpoint } from './useResponsive';
+export { useErrorHandler } from './useErrorHandler';

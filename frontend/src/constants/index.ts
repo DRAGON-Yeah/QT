@@ -157,6 +157,8 @@ export const PERMISSIONS = {
 export const ROUTES = {
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
+  USERS: '/users',
+  MENUS: '/menus',
   EXCHANGES: '/exchanges',
   TRADING: '/trading',
   STRATEGIES: '/strategies',

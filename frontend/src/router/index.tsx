@@ -12,6 +12,8 @@ import AuthGuard from '@/components/auth/AuthGuard';
 // 页面组件懒加载
 const LoginPage = React.lazy(() => import('@/pages/Login'));
 const DashboardPage = React.lazy(() => import('@/pages/Dashboard'));
+const UserManagementPage = React.lazy(() => import('@/pages/UserManagement'));
+const MenuManagementPage = React.lazy(() => import('@/pages/MenuManagement'));
 const ExchangesPage = React.lazy(() => import('@/pages/Exchanges'));
 const TradingPage = React.lazy(() => import('@/pages/Trading'));
 const StrategiesPage = React.lazy(() => import('@/pages/Strategies'));
@@ -59,6 +61,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoading />}>
             <DashboardPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: ROUTES.USERS,
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <UserManagementPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: ROUTES.MENUS,
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <MenuManagementPage />
           </Suspense>
         ),
       },

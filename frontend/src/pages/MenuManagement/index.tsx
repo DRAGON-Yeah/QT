@@ -64,10 +64,12 @@ const MenuManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await menuService.getMenuTree();
-      setMenuTree(response.data);
+      // 直接使用响应数据，因为我们的API直接返回数组
+      const treeData = Array.isArray(response) ? response : (response.data || []);
+      setMenuTree(treeData);
       
       // 默认展开所有节点
-      const allKeys = getAllKeys(response.data);
+      const allKeys = getAllKeys(treeData);
       setExpandedKeys(allKeys);
     } catch (error) {
       message.error('加载菜单失败');
@@ -93,6 +95,9 @@ const MenuManagement: React.FC = () => {
 
   // 转换为Tree组件需要的数据格式
   const convertToTreeData = (nodes: MenuNode[]): TreeDataNode[] => {
+    if (!nodes || !Array.isArray(nodes)) {
+      return [];
+    }
     return nodes.map(node => ({
       key: node.id,
       title: (

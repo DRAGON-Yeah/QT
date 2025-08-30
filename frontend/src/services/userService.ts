@@ -5,6 +5,7 @@ import {
   User, Role, Permission, UserProfile, UserRole, LoginLog, 
   UserStatistics, RoleAssignment, ApiResponse, PaginatedResponse 
 } from '../types';
+import { noAutoLogoutFetch } from '../utils/request';
 
 const API_BASE = '/api/users';
 
@@ -29,7 +30,7 @@ class UserService {
       }
     });
     
-    const response = await fetch(`${API_BASE}/users/?${searchParams}`);
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/?${searchParams}`);
     
     if (!response.ok) {
       throw new Error('获取用户列表失败');
@@ -42,7 +43,7 @@ class UserService {
    * 获取用户详情
    */
   async getUserDetail(userId: string): Promise<User> {
-    const response = await fetch(`${API_BASE}/users/${userId}/`);
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/${userId}/`);
     
     if (!response.ok) {
       throw new Error('获取用户详情失败');
@@ -69,7 +70,7 @@ class UserService {
     language?: string;
     timezoneName?: string;
   }): Promise<User> {
-    const response = await fetch(`${API_BASE}/users/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ class UserService {
    * 更新用户
    */
   async updateUser(userId: string, userData: Partial<User>): Promise<User> {
-    const response = await fetch(`${API_BASE}/users/${userId}/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/${userId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -111,7 +112,7 @@ class UserService {
    * 删除用户
    */
   async deleteUser(userId: string): Promise<void> {
-    const response = await fetch(`${API_BASE}/users/${userId}/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/${userId}/`, {
       method: 'DELETE',
     });
     
@@ -125,7 +126,7 @@ class UserService {
    * 切换用户状态
    */
   async toggleUserStatus(userId: string): Promise<{ isActive: boolean }> {
-    const response = await fetch(`${API_BASE}/users/${userId}/toggle_status/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/${userId}/toggle_status/`, {
       method: 'POST',
     });
     
@@ -142,7 +143,7 @@ class UserService {
    * 解锁用户账户
    */
   async unlockUser(userId: string): Promise<void> {
-    const response = await fetch(`${API_BASE}/users/${userId}/unlock_account/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/${userId}/unlock_account/`, {
       method: 'POST',
     });
     
@@ -161,7 +162,7 @@ class UserService {
     newPasswordConfirm: string;
     forceChange?: boolean;
   }): Promise<void> {
-    const response = await fetch(`${API_BASE}/users/${userId}/change_password/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/${userId}/change_password/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -179,7 +180,7 @@ class UserService {
    * 获取用户统计信息
    */
   async getUserStatistics(): Promise<UserStatistics> {
-    const response = await fetch(`${API_BASE}/users/statistics/`);
+    const response = await noAutoLogoutFetch(`${API_BASE}/users/statistics/`);
     
     if (!response.ok) {
       throw new Error('获取用户统计失败');
@@ -193,7 +194,7 @@ class UserService {
    * 获取角色列表
    */
   async getRoleList(): Promise<Role[]> {
-    const response = await fetch(`${API_BASE}/roles/`);
+    const response = await noAutoLogoutFetch(`${API_BASE}/roles/`);
     
     if (!response.ok) {
       throw new Error('获取角色列表失败');
@@ -207,7 +208,7 @@ class UserService {
    * 获取角色详情
    */
   async getRoleDetail(roleId: number): Promise<Role> {
-    const response = await fetch(`${API_BASE}/roles/${roleId}/`);
+    const response = await noAutoLogoutFetch(`${API_BASE}/roles/${roleId}/`);
     
     if (!response.ok) {
       throw new Error('获取角色详情失败');
@@ -225,7 +226,7 @@ class UserService {
     description?: string;
     permissionIds?: number[];
   }): Promise<Role> {
-    const response = await fetch(`${API_BASE}/roles/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/roles/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -246,7 +247,7 @@ class UserService {
    * 更新角色
    */
   async updateRole(roleId: number, roleData: Partial<Role>): Promise<Role> {
-    const response = await fetch(`${API_BASE}/roles/${roleId}/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/roles/${roleId}/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -267,7 +268,7 @@ class UserService {
    * 删除角色
    */
   async deleteRole(roleId: number): Promise<void> {
-    const response = await fetch(`${API_BASE}/roles/${roleId}/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/roles/${roleId}/`, {
       method: 'DELETE',
     });
     
@@ -281,7 +282,7 @@ class UserService {
    * 获取权限列表
    */
   async getPermissionList(): Promise<Record<string, Permission[]>> {
-    const response = await fetch(`${API_BASE}/permissions/`);
+    const response = await noAutoLogoutFetch(`${API_BASE}/permissions/`);
     
     if (!response.ok) {
       throw new Error('获取权限列表失败');
@@ -295,7 +296,7 @@ class UserService {
    * 批量分配角色
    */
   async assignRoles(assignment: RoleAssignment): Promise<any> {
-    const response = await fetch(`${API_BASE}/role-assignment/`, {
+    const response = await noAutoLogoutFetch(`${API_BASE}/role-assignment/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -333,7 +334,7 @@ class UserService {
       ? `${API_BASE}/login-logs/${params.userId}/?${searchParams}`
       : `${API_BASE}/login-logs/?${searchParams}`;
     
-    const response = await fetch(url);
+    const response = await noAutoLogoutFetch(url);
     
     if (!response.ok) {
       throw new Error('获取登录日志失败');
