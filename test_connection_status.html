@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantTrade 连接状态测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1890ff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #d9d9d9;
+        }
+        .status-success {
+            background-color: #f6ffed;
+            border-color: #52c41a;
+        }
+        .status-error {
+            background-color: #fff2f0;
+            border-color: #ff4d4f;
+        }
+        .status-loading {
+            background-color: #e6f7ff;
+            border-color: #1890ff;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .success { background-color: #52c41a; }
+        .error { background-color: #ff4d4f; }
+        .loading { 
+            background-color: #1890ff;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .test-button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #40a9ff;
+        }
+        .test-button:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+        }
+        .response-box {
+            background: #f8f8f8;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .info-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 QuantTrade 系统连接状态</h1>
+        
+        <div class="info-section">
+            <h3>📋 系统信息</h3>
+            <p><strong>前端地址:</strong> <span id="frontend-url">http://localhost:3000</span></p>
+            <p><strong>后端地址:</strong> <span id="backend-url">http://localhost:8000</span></p>
+            <p><strong>当前时间:</strong> <span id="current-time"></span></p>
+        </div>
+
+        <div class="status-item" id="frontend-status">
+            <div style="display: flex; align-items: center;">
+                <div class="status-indicator loading" id="frontend-indicator"></div>
+                <span>前端服务 (React + Vite)</span>
+            </div>
+            <span id="frontend-text">检测中...</span>
+        </div>
+
+        <div class="status-item" id="backend-status">
+            <div style="display: flex; align-items: center;">
+                <div class="status-indicator loading" id="backend-indicator"></div>
+                <span>后端服务 (Django)</span>
+            </div>
+            <span id="backend-text">检测中...</span>
+        </div>
+
+        <div class="status-item" id="api-status">
+            <div style="display: flex; align-items: center;">
+                <div class="status-indicator loading" id="api-indicator"></div>
+                <span>API 连接</span>
+            </div>
+            <span id="api-text">检测中...</span>
+        </div>
+
+        <div class="status-item" id="auth-status">
+            <div style="display: flex; align-items: center;">
+                <div class="status-indicator loading" id="auth-indicator"></div>
+                <span>认证系统</span>
+            </div>
+            <span id="auth-text">检测中...</span>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="test-button" onclick="testConnection()">🔄 重新测试</button>
+            <button class="test-button" onclick="testAPI()">🧪 测试 API</button>
+            <button class="test-button" onclick="openFrontend()">🌐 打开前端</button>
+            <button class="test-button" onclick="openBackend()">⚙️ 打开后端</button>
+        </div>
+
+        <div id="test-results" style="display: none;">
+            <h3>🔍 测试结果</h3>
+            <div class="response-box" id="response-content"></div>
+        </div>
+
+        <div class="info-section">
+            <h3>📖 使用说明</h3>
+            <ul>
+                <li><strong>前端服务:</strong> 运行在端口 3000，提供用户界面</li>
+                <li><strong>后端服务:</strong> 运行在端口 8000，提供 API 接口</li>
+                <li><strong>API 连接:</strong> 测试前后端通信是否正常</li>
+                <li><strong>认证系统:</strong> 测试用户认证功能是否可用</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 更新当前时间
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString('zh-CN');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // 设置状态
+        function setStatus(id, status, text) {
+            const item = document.getElementById(id + '-status');
+            const indicator = document.getElementById(id + '-indicator');
+            const textElement = document.getElementById(id + '-text');
+            
+            item.className = 'status-item status-' + status;
+            indicator.className = 'status-indicator ' + status;
+            textElement.textContent = text;
+        }
+
+        // 显示响应内容
+        function showResponse(content) {
+            document.getElementById('test-results').style.display = 'block';
+            document.getElementById('response-content').textContent = JSON.stringify(content, null, 2);
+        }
+
+        // 测试前端连接
+        async function testFrontend() {
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    setStatus('frontend', 'success', '✅ 运行正常');
+                    return true;
+                } else {
+                    setStatus('frontend', 'error', '❌ 响应异常');
+                    return false;
+                }
+            } catch (error) {
+                setStatus('frontend', 'error', '❌ 连接失败');
+                return false;
+            }
+        }
+
+        // 测试后端连接
+        async function testBackend() {
+            try {
+                const response = await fetch('http://localhost:8000/api/health/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus('backend', 'success', '✅ 运行正常');
+                    return data;
+                } else {
+                    setStatus('backend', 'error', '❌ 响应异常');
+                    return false;
+                }
+            } catch (error) {
+                setStatus('backend', 'error', '❌ 连接失败');
+                return false;
+            }
+        }
+
+        // 测试API连接
+        async function testAPIConnection() {
+            try {
+                const response = await fetch('http://localhost:8000/api/users/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.status === 401) {
+                    setStatus('api', 'success', '✅ API 可访问 (需要认证)');
+                    return { status: 'needs_auth', message: 'API accessible but requires authentication' };
+                } else if (response.ok) {
+                    setStatus('api', 'success', '✅ API 连接正常');
+                    return await response.json();
+                } else {
+                    setStatus('api', 'error', '❌ API 响应异常');
+                    return false;
+                }
+            } catch (error) {
+                setStatus('api', 'error', '❌ API 连接失败');
+                return false;
+            }
+        }
+
+        // 测试认证系统
+        async function testAuth() {
+            try {
+                const response = await fetch('http://localhost:8000/api/auth/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'test',
+                        password: 'test'
+                    })
+                });
+                
+                if (response.status === 400 || response.status === 401) {
+                    setStatus('auth', 'success', '✅ 认证系统可用');
+                    return { status: 'auth_available', message: 'Authentication system is working' };
+                } else if (response.ok) {
+                    setStatus('auth', 'success', '✅ 认证系统正常');
+                    return await response.json();
+                } else {
+                    setStatus('auth', 'error', '❌ 认证系统异常');
+                    return false;
+                }
+            } catch (error) {
+                setStatus('auth', 'error', '❌ 认证系统连接失败');
+                return false;
+            }
+        }
+
+        // 完整连接测试
+        async function testConnection() {
+            // 重置所有状态为加载中
+            ['frontend', 'backend', 'api', 'auth'].forEach(id => {
+                setStatus(id, 'loading', '检测中...');
+            });
+
+            // 依次测试各个服务
+            const frontendResult = await testFrontend();
+            const backendResult = await testBackend();
+            const apiResult = await testAPIConnection();
+            const authResult = await testAuth();
+
+            console.log('测试结果:', {
+                frontend: frontendResult,
+                backend: backendResult,
+                api: apiResult,
+                auth: authResult
+            });
+        }
+
+        // 测试API功能
+        async function testAPI() {
+            const results = {};
+            
+            // 测试健康检查
+            try {
+                const healthResponse = await fetch('http://localhost:8000/api/health/');
+                results.health = await healthResponse.json();
+            } catch (error) {
+                results.health = { error: error.message };
+            }
+
+            // 测试用户API
+            try {
+                const usersResponse = await fetch('http://localhost:8000/api/users/');
+                if (usersResponse.status === 401) {
+                    results.users = { status: 'requires_auth', message: 'Authentication required' };
+                } else {
+                    results.users = await usersResponse.json();
+                }
+            } catch (error) {
+                results.users = { error: error.message };
+            }
+
+            showResponse(results);
+        }
+
+        // 打开前端
+        function openFrontend() {
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        // 打开后端
+        function openBackend() {
+            window.open('http://localhost:8000/admin/', '_blank');
+        }
+
+        // 页面加载时自动测试
+        window.onload = function() {
+            setTimeout(testConnection, 1000);
+        };
+    </script>
+</body>
+</html>

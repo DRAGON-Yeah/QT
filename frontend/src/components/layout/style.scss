@@ -2,6 +2,7 @@
  * 布局组件样式
  */
 
+@use 'sass:color';
 @use '@/styles/variables.scss' as *;
 
 // 主布局
@@ -47,17 +48,68 @@
       }
     }
     
-    .sidebar-menu {
-      border-right: none;
+    .sidebar-menu-wrapper {
+      position: relative;
       
-      .ant-menu-item {
-        margin: 4px 8px;
-        border-radius: $border-radius;
+      .sidebar-menu {
+        border-right: none;
         
-        &.ant-menu-item-selected {
-          background-color: $primary-color;
+        .ant-menu-item {
+          margin: 4px 8px;
+          border-radius: $border-radius;
+          
+          &.ant-menu-item-selected {
+            background-color: $primary-color;
+          }
+        }
+        
+        .ant-menu-submenu {
+          margin: 4px 8px;
+          border-radius: $border-radius;
+          
+          .ant-menu-submenu-title {
+            border-radius: $border-radius;
+            
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+            }
+          }
+        }
+        
+        // 折叠状态下的菜单项悬停效果
+        &.sidebar-menu--collapsed {
+          .ant-menu-submenu {
+            .ant-menu-submenu-title {
+              position: relative;
+              
+              &:hover {
+                background-color: rgba(255, 255, 255, 0.15);
+                transform: scale(1.02);
+                transition: all 0.2s ease;
+              }
+              
+              // 添加右侧指示器，暗示有子菜单
+              &::after {
+                content: '›';
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 16px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+              }
+              
+              &:hover::after {
+                opacity: 1;
+              }
+            }
+          }
         }
       }
+      
+
     }
   }
   
@@ -179,5 +231,109 @@
   
   @include desktop {
     display: none;
+  }
+}
+
+// 悬浮子菜单
+.sidebar-floating-submenu {
+  position: fixed !important;
+  z-index: 9999 !important; // 确保最高层级
+  pointer-events: auto !important;
+
+  .floating-submenu-content {
+    background: #001529; // 与侧边栏相同的深色背景
+    border-radius: $border-radius;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); // 增强阴影效果
+    min-width: 200px;
+    max-width: 280px;
+    border: 1px solid rgba(255, 255, 255, 0.2); // 增强边框可见性
+    overflow: hidden;
+    
+    .floating-submenu-title {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: $font-weight-medium;
+      font-size: $font-size-text-small;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      position: relative;
+      
+      // 添加顶部高亮线
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, $primary-color, color.mix($primary-color, white, 80%));
+      }
+    }
+    
+    .floating-submenu-items {
+      padding: 8px 0;
+      
+      .floating-submenu-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        color: rgba(255, 255, 255, 0.75);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        position: relative;
+        border-radius: 0;
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.12);
+          color: rgba(255, 255, 255, 0.95);
+          padding-left: 20px; // 悬停时轻微缩进
+        }
+        
+        &--active {
+          background-color: $primary-color;
+          color: $white;
+          position: relative;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba(255, 255, 255, 0.3);
+          }
+          
+          &:hover {
+            background-color: color.mix($primary-color, white, 85%);
+          }
+        }
+        
+        .floating-submenu-item-icon {
+          margin-right: 12px;
+          font-size: 14px;
+          width: 14px;
+          text-align: center;
+        }
+        
+        .floating-submenu-item-label {
+          font-size: $font-size-text-normal;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+  
+  // 添加一个小三角形指示器
+  &::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 20px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #001529;
   }
 }

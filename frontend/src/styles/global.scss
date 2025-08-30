@@ -35,9 +35,9 @@ a {
   text-decoration: none;
   transition: $transition-fast;
   
-  &:hover {
-    color: color.adjust($primary-color, $lightness: -10%);
-  }
+      &:hover {
+      color: color.mix($primary-color, black, 90%);
+    }
   
   &:focus {
     outline: 2px solid rgba($primary-color, 0.5);

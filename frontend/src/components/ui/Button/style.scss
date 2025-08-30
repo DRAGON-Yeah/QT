@@ -35,8 +35,8 @@
     border-color: $success-color;
     
     &:hover, &:focus {
-      background-color: color.adjust($success-color, $lightness: -10%);
-      border-color: color.adjust($success-color, $lightness: -10%);
+              background-color: color.adjust($success-color, $lightness: -10%);
+        border-color: color.adjust($success-color, $lightness: -10%);
     }
   }
   
@@ -45,8 +45,8 @@
     border-color: $warning-color;
     
     &:hover, &:focus {
-      background-color: color.adjust($warning-color, $lightness: -10%);
-      border-color: color.adjust($warning-color, $lightness: -10%);
+              background-color: color.adjust($warning-color, $lightness: -10%);
+        border-color: color.adjust($warning-color, $lightness: -10%);
     }
   }
   
@@ -55,8 +55,8 @@
     border-color: $error-color;
     
     &:hover, &:focus {
-      background-color: color.adjust($error-color, $lightness: -10%);
-      border-color: color.adjust($error-color, $lightness: -10%);
+              background-color: color.adjust($error-color, $lightness: -10%);
+        border-color: color.adjust($error-color, $lightness: -10%);
     }
   }
   

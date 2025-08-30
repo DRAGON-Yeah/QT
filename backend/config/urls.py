@@ -49,6 +49,7 @@ urlpatterns = [
     
     # 系统健康检查端点 - 用于负载均衡器和监控系统
     path('health/', views.health_check, name='health_check'),
+    path('api/health/', views.health_check, name='api_health_check'),
 ]
 
 # 开发环境配置 - 仅在 DEBUG=True 时生效
