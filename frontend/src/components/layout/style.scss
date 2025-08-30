@@ -50,9 +50,32 @@
     
     .sidebar-menu-wrapper {
       position: relative;
+      height: calc(100vh - #{$header-height}); // 减去头部高度
+      overflow-y: auto; // 启用垂直滚动
+      overflow-x: hidden; // 隐藏水平滚动条
+      
+      // 自定义滚动条样式
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.5);
+        }
+      }
       
       .sidebar-menu {
         border-right: none;
+        height: 100%; // 确保菜单占满容器高度
         
         .ant-menu-item {
           margin: 4px 8px;
@@ -107,8 +130,20 @@
             }
           }
         }
+        
+        // 移动端适配
+        @include mobile {
+          // 在移动端保持默认的滚动行为
+          height: auto;
+          min-height: 100%;
+        }
       }
       
+      // 为移动端调整滚动容器高度
+      @include mobile {
+        height: calc(100vh - #{$header-height});
+        max-height: calc(100vh - #{$header-height});
+      }
 
     }
   }

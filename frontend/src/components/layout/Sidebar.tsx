@@ -219,7 +219,14 @@ const Sidebar: React.FC = () => {
 
   // 处理子菜单展开/收起
   const handleOpenChange = (keys: string[]) => {
-    setOpenKeys(keys);
+    // 确保无论什么情况下都能正确更新openKeys
+    // 这样可以保证点击向上箭头时能正确收起菜单
+    
+    // 在非折叠状态下，直接更新openKeys
+    // 在折叠状态下，openKeys会被强制设置为[]，所以这里的更新不会生效
+    if (!sidebarCollapsed || isMobile) {
+      setOpenKeys(keys);
+    }
   };
 
   /**
@@ -318,15 +325,16 @@ const Sidebar: React.FC = () => {
         for (const child of item.children) {
           if (pathname.startsWith(child.key)) {
             // 如果当前路径匹配子菜单，展开对应的父菜单
+            // 但只在该父菜单还没有展开时才自动展开，避免干扰用户手动收起操作
             if (!openKeys.includes(item.key)) {
-              setOpenKeys([...openKeys, item.key]);
+              setOpenKeys(prevKeys => [...prevKeys, item.key]);
             }
             break;
           }
         }
       }
     }
-  }, [location.pathname, openKeys]);
+  }, [location.pathname]); // 移除openKeys依赖，避免无限循环和干扰用户操作
 
   /**
    * 获取当前选中的菜单项

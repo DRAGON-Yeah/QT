@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侧边栏滚动测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f0f2f5;
+        }
+        
+        .test-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 240px;
+            background: #001529;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-logo {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .sidebar-menu-wrapper {
+            position: relative;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .sidebar-menu-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-menu-wrapper::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .sidebar-menu-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .sidebar-menu-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .menu-item {
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            margin: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item.active {
+            background-color: #1890ff;
+            color: white;
+        }
+        
+        .submenu {
+            background: rgba(255, 255, 255, 0.05);
+            margin: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .submenu-title {
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        
+        .submenu-title:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .submenu-item {
+            padding: 8px 32px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .submenu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .submenu-item.active {
+            background-color: #1890ff;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            background: white;
+            margin: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #1890ff;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                QuantTrade
+            </div>
+            <div class="sidebar-menu-wrapper" id="menuWrapper">
+                <div class="menu-item active">仪表盘</div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">账户管理</div>
+                    <div class="submenu-item">账户列表</div>
+                    <div class="submenu-item">资金流水</div>
+                    <div class="submenu-item">账户设置</div>
+                </div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">交易中心</div>
+                    <div class="submenu-item">现货交易</div>
+                    <div class="submenu-item">合约交易</div>
+                    <div class="submenu-item">交易历史</div>
+                    <div class="submenu-item">持仓管理</div>
+                </div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">策略管理</div>
+                    <div class="submenu-item active">策略列表</div>
+                    <div class="submenu-item">策略回测</div>
+                    <div class="submenu-item">策略监控</div>
+                    <div class="submenu-item">策略开发</div>
+                    <div class="submenu-item">策略优化</div>
+                    <div class="submenu-item">策略部署</div>
+                </div>
+                
+                <div class="menu-item">风险控制</div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">数据分析</div>
+                    <div class="submenu-item">市场分析</div>
+                    <div class="submenu-item">技术指标</div>
+                    <div class="submenu-item">量化因子</div>
+                    <div class="submenu-item">回测报告</div>
+                    <div class="submenu-item">性能分析</div>
+                </div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">系统设置</div>
+                    <div class="submenu-item">菜单管理</div>
+                    <div class="submenu-item">系统监控</div>
+                    <div class="submenu-item">数据库管理</div>
+                    <div class="submenu-item">API管理</div>
+                    <div class="submenu-item">用户权限</div>
+                    <div class="submenu-item">系统日志</div>
+                </div>
+                
+                <!-- 添加更多菜单项以测试滚动 -->
+                <div class="submenu">
+                    <div class="submenu-title">高级功能</div>
+                    <div class="submenu-item">机器学习</div>
+                    <div class="submenu-item">深度学习</div>
+                    <div class="submenu-item">强化学习</div>
+                    <div class="submenu-item">神经网络</div>
+                    <div class="submenu-item">遗传算法</div>
+                    <div class="submenu-item">模型训练</div>
+                </div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">数据源</div>
+                    <div class="submenu-item">行情数据</div>
+                    <div class="submenu-item">基本面数据</div>
+                    <div class="submenu-item">新闻数据</div>
+                    <div class="submenu-item">社交媒体</div>
+                    <div class="submenu-item">另类数据</div>
+                    <div class="submenu-item">数据清洗</div>
+                </div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">风险管理</div>
+                    <div class="submenu-item">风险模型</div>
+                    <div class="submenu-item">压力测试</div>
+                    <div class="submenu-item">VaR计算</div>
+                    <div class="submenu-item">风险报告</div>
+                    <div class="submenu-item">合规检查</div>
+                    <div class="submenu-item">监管报告</div>
+                </div>
+                
+                <div class="submenu">
+                    <div class="submenu-title">投资组合</div>
+                    <div class="submenu-item">组合构建</div>
+                    <div class="submenu-item">资产配置</div>
+                    <div class="submenu-item">再平衡</div>
+                    <div class="submenu-item">业绩归因</div>
+                    <div class="submenu-item">基准对比</div>
+                    <div class="submenu-item">收益分析</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <h1>策略管理</h1>
+            <p>开发、回测和管理交易策略</p>
+            <br>
+            <p><strong>测试说明：</strong></p>
+            <ul>
+                <li>侧边栏现在具有滚动功能</li>
+                <li>当菜单内容超出屏幕高度时，会自动显示滚动条</li>
+                <li>滚动条样式已自定义，更符合深色主题</li>
+                <li>在移动端也能正常滚动</li>
+                <li>尝试调整浏览器窗口高度来测试滚动效果</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="scroll-indicator">
+        滚动测试：侧边栏可滚动
+    </div>
+    
+    <script>
+        // 添加一些交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuWrapper = document.getElementById('menuWrapper');
+            
+            // 监听滚动事件
+            menuWrapper.addEventListener('scroll', function() {
+                const scrollTop = this.scrollTop;
+                const scrollHeight = this.scrollHeight;
+                const clientHeight = this.clientHeight;
+                const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+                
+                console.log(`滚动位置: ${Math.round(scrollPercentage)}%`);
+            });
+        });
+    </script>
+</body>
+</html>
