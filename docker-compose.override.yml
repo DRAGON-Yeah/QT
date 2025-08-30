@@ -1,0 +1,81 @@
+# QuantTrade 本地开发覆盖配置
+# 此文件会自动与 docker-compose.yml 合并
+
+services:
+  # 后端开发配置覆盖
+  backend:
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - PYTHONPATH=/app
+    volumes:
+      - ./backend:/app:cached
+      - backend_venv:/app/.venv
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # 调试端口
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+  # 前端开发配置覆盖
+  frontend:
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app:cached
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+
+  # Celery开发配置
+  celery:
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+    volumes:
+      - ./backend:/app:cached
+    command: >
+      sh -c "
+        sleep 10 &&
+        celery -A config worker -l debug --autoreload
+      "
+
+  # Celery Beat开发配置
+  celery-beat:
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+    volumes:
+      - ./backend:/app:cached
+    command: >
+      sh -c "
+        sleep 15 &&
+        celery -A config beat -l debug
+      "
+
+  # 开发工具容器
+  dev-tools:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app:cached
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - DATABASE_URL=postgresql://quanttrade:quanttrade123@db:5432/quanttrade_dev
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    profiles:
+      - tools
+    command: tail -f /dev/null
+
+volumes:
+  backend_venv:
+  frontend_node_modules:

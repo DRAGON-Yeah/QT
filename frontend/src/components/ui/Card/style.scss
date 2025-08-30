@@ -1,0 +1,105 @@
+/**
+ * 卡片组件样式
+ */
+
+@use '@/styles/variables.scss' as *;
+
+.qt-card {
+  border-radius: $card-border-radius;
+  box-shadow: $shadow-light;
+  transition: all $transition-fast;
+  
+  &--hoverable {
+    cursor: pointer;
+    
+    &:hover {
+      box-shadow: $shadow-medium;
+      transform: translateY(-2px);
+    }
+  }
+  
+  &--loading {
+    pointer-events: none;
+  }
+  
+  .ant-card-head {
+    border-bottom: 1px solid $border-color-light;
+    
+    .ant-card-head-title {
+      font-size: $font-size-title-small;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+    }
+  }
+  
+  .ant-card-body {
+    padding: $spacing-component-gap;
+    
+    &.ant-card-body-small {
+      padding: $spacing-element-gap;
+    }
+  }
+}
+
+// 统计卡片样式
+.qt-stat-card {
+  .qt-stat-card__content {
+    text-align: center;
+  }
+  
+  .qt-stat-card__title {
+    font-size: $font-size-text-normal;
+    color: $text-secondary;
+    margin-bottom: $spacing-element-gap;
+  }
+  
+  .qt-stat-card__value {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: $spacing-content-gap;
+    margin-bottom: $spacing-element-gap;
+    
+    .qt-stat-card__prefix,
+    .qt-stat-card__suffix {
+      font-size: $font-size-text-normal;
+      color: $text-secondary;
+    }
+    
+    .qt-stat-card__number {
+      font-size: $font-size-title-large;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    }
+  }
+  
+  .qt-stat-card__trend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-content-gap;
+    font-size: $font-size-text-small;
+    
+    &.positive {
+      color: $up-color;
+    }
+    
+    &.negative {
+      color: $down-color;
+    }
+    
+    .qt-stat-card__trend-icon {
+      font-size: 16px;
+    }
+  }
+  
+  // 响应式
+  @include mobile {
+    .qt-stat-card__value {
+      .qt-stat-card__number {
+        font-size: $font-size-title-medium;
+      }
+    }
+  }
+}

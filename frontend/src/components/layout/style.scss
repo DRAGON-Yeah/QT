@@ -1,0 +1,183 @@
+/**
+ * 布局组件样式
+ */
+
+@use '@/styles/variables.scss' as *;
+
+// 主布局
+.app-layout {
+  min-height: 100vh;
+  
+  // 侧边栏
+  .app-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: $z-index-dropdown;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    transition: all $transition-normal;
+    
+    &--mobile {
+      transform: translateX(-100%);
+      
+      &.app-sidebar--mobile-open {
+        transform: translateX(0);
+      }
+    }
+    
+    .sidebar-logo {
+      height: $header-height;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      
+      .logo-content {
+        color: $white;
+        font-weight: $font-weight-bold;
+        
+        .logo-text {
+          font-size: $font-size-title-medium;
+        }
+        
+        .logo-icon {
+          font-size: $font-size-title-small;
+        }
+      }
+    }
+    
+    .sidebar-menu {
+      border-right: none;
+      
+      .ant-menu-item {
+        margin: 4px 8px;
+        border-radius: $border-radius;
+        
+        &.ant-menu-item-selected {
+          background-color: $primary-color;
+        }
+      }
+    }
+  }
+  
+  // 主要内容区域
+  .app-main {
+    margin-left: $sidebar-width;
+    transition: margin-left $transition-normal;
+    
+    .app-layout.ant-layout-has-sider & {
+      margin-left: 0;
+    }
+    
+    @include mobile {
+      margin-left: 0;
+    }
+  }
+  
+  // 当侧边栏折叠时调整主内容区域
+  .app-sidebar--collapsed + .app-main {
+    margin-left: $sidebar-collapsed-width;
+    
+    @include mobile {
+      margin-left: 0;
+    }
+  }
+  
+  // 顶部导航
+  .app-header {
+    background: $white;
+    padding: 0 $spacing-page-padding;
+    box-shadow: $shadow-light;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: $z-index-dropdown - 1;
+    
+    @include mobile {
+      padding: 0 $spacing-component-gap;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: $spacing-component-gap;
+      
+      .sidebar-toggle {
+        font-size: 18px;
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.1);
+        }
+      }
+      
+      .header-breadcrumb {
+        @include mobile {
+          display: none;
+        }
+      }
+    }
+    
+    .header-right {
+      .notification-btn {
+        font-size: 16px;
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.1);
+        }
+      }
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: $spacing-element-gap;
+        cursor: pointer;
+        padding: $spacing-content-gap $spacing-element-gap;
+        border-radius: $border-radius;
+        transition: $transition-fast;
+        
+        &:hover {
+          background-color: rgba($primary-color, 0.1);
+        }
+        
+        .username {
+          font-weight: $font-weight-medium;
+          color: $text-primary;
+        }
+      }
+    }
+  }
+  
+  // 内容区域
+  .app-content {
+    padding: $spacing-page-padding;
+    background: $background;
+    min-height: calc(100vh - #{$header-height});
+    
+    @include mobile {
+      padding: $spacing-component-gap;
+    }
+    
+    .content-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  }
+}
+
+// 移动端遮罩
+.mobile-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-index-dropdown - 1;
+  
+  @include desktop {
+    display: none;
+  }
+}

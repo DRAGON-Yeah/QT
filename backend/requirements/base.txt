@@ -1,0 +1,40 @@
+# Django核心依赖
+Django>=4.2.0,<5.0.0
+djangorestframework>=3.14.0
+django-cors-headers>=4.0.0
+channels>=4.0.0
+channels-redis>=4.1.0
+
+# 数据库驱动
+psycopg2-binary>=2.9.0
+dj-database-url>=2.1.0
+
+# 缓存和任务队列
+redis>=4.5.0
+django-redis>=5.3.0
+celery>=5.3.0
+django-celery-beat>=2.5.0
+django-celery-results>=2.5.0
+
+# 交易所集成
+ccxt>=4.0.0
+
+# 数据分析
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 认证和安全
+PyJWT>=2.8.0
+djangorestframework-simplejwt>=5.3.0
+cryptography>=41.0.0
+django-ratelimit>=4.0.0
+
+# 工具库
+python-dotenv>=1.0.0
+django-filter>=23.2
+gunicorn>=21.0.0
+whitenoise>=6.5.0
+
+# 监控和日志
+sentry-sdk>=1.32.0
+psutil>=5.9.0

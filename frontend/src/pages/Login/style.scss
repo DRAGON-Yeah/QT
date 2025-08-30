@@ -1,0 +1,195 @@
+/**
+ * 登录页面样式
+ */
+
+@use '@/styles/variables.scss' as *;
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-page-padding;
+  
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: $spacing-page-padding * 2;
+      
+      .login-title {
+        font-size: 48px;
+        font-weight: $font-weight-bold;
+        color: $white;
+        margin-bottom: $spacing-element-gap;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      .login-subtitle {
+        font-size: $font-size-title-small;
+        color: rgba($white, 0.9);
+        margin: 0;
+      }
+    }
+    
+    .login-card {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      border: none;
+      
+      .ant-card-body {
+        padding: $spacing-page-padding * 1.5;
+      }
+      
+      // 表单整体样式
+      .ant-form {
+        .ant-form-item {
+          margin-bottom: $spacing-page-padding;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          // 确保表单项控件对齐
+          .ant-form-item-control-input {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+          }
+        }
+        
+        // 输入框统一样式
+        .ant-input-affix-wrapper,
+        .ant-input {
+          height: 48px;
+          border-radius: $border-radius-large;
+          border: 1px solid #d9d9d9;
+          transition: all 0.3s;
+          
+          &:hover {
+            border-color: #40a9ff;
+          }
+          
+          &:focus,
+          &.ant-input-affix-wrapper-focused {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+          }
+        }
+        
+        // 带前缀图标的输入框
+        .ant-input-affix-wrapper {
+          padding: 0 12px 0 0; // 右侧padding，左侧由prefix控制
+          
+          .ant-input-prefix {
+            margin-right: 12px;
+            padding-left: 12px;
+            width: 44px; // 固定宽度确保完美对齐
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            .anticon {
+              color: $text-secondary;
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              
+              // 确保所有图标都居中对齐
+              svg {
+                width: 16px;
+                height: 16px;
+              }
+            }
+          }
+          
+          // 输入框文本样式
+          .ant-input {
+            border: none;
+            padding: 0;
+            height: 46px;
+            line-height: 46px;
+            background: transparent;
+            
+            &:focus {
+              box-shadow: none;
+            }
+          }
+          
+          // 密码输入框的显示/隐藏图标
+          .ant-input-suffix {
+            margin-left: 8px;
+            
+            .anticon {
+              color: $text-secondary;
+              font-size: 16px;
+              cursor: pointer;
+              transition: color 0.3s;
+              
+              &:hover {
+                color: $primary-color;
+              }
+            }
+          }
+        }
+        
+        // 登录按钮样式
+        .ant-btn {
+          height: 48px;
+          border-radius: $border-radius-large;
+          font-size: $font-size-title-small;
+          font-weight: $font-weight-medium;
+          margin-top: 8px;
+          
+          &.ant-btn-primary {
+            background: $primary-color;
+            border-color: $primary-color;
+            
+            &:hover {
+              background: lighten($primary-color, 10%);
+              border-color: lighten($primary-color, 10%);
+            }
+          }
+        }
+      }
+    }
+    
+    .login-footer {
+      text-align: center;
+      margin-top: $spacing-page-padding;
+      
+      p {
+        color: rgba($white, 0.7);
+        font-size: $font-size-text-small;
+        margin: 0;
+      }
+    }
+  }
+  
+  // 响应式
+  @include mobile {
+    padding: $spacing-component-gap;
+    
+    .login-container {
+      .login-header {
+        margin-bottom: $spacing-page-padding;
+        
+        .login-title {
+          font-size: 36px;
+        }
+      }
+      
+      .login-card {
+        .ant-card-body {
+          padding: $spacing-page-padding;
+        }
+      }
+    }
+  }
+}

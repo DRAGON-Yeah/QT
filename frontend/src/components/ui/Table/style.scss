@@ -1,0 +1,144 @@
+/**
+ * 表格组件样式
+ */
+
+@use '@/styles/variables.scss' as *;
+
+.qt-table {
+  .ant-table {
+    border-radius: $border-radius;
+    overflow: hidden;
+  }
+  
+  .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    border-bottom: 1px solid $border-color-light;
+  }
+  
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid $border-color-light;
+    color: $text-primary;
+  }
+  
+  .ant-table-tbody > tr:hover > td {
+    background: #f5f5f5;
+  }
+  
+  // 斑马纹样式
+  &--striped {
+    .ant-table-tbody > tr:nth-child(even) > td {
+      background: #fafafa;
+    }
+    
+    .ant-table-tbody > tr:nth-child(even):hover > td {
+      background: #f0f0f0;
+    }
+  }
+  
+  // 尺寸变体
+  &--small {
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 8px 12px;
+      font-size: $font-size-text-small;
+    }
+  }
+  
+  &--large {
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 16px 20px;
+      font-size: $font-size-text-normal;
+    }
+  }
+  
+  // 操作列样式
+  .table-actions {
+    display: flex;
+    gap: $spacing-element-gap;
+    align-items: center;
+    
+    .ant-btn {
+      padding: 0 8px;
+      height: 24px;
+      font-size: $font-size-text-small;
+    }
+  }
+  
+  // 状态列样式
+  .status-cell {
+    display: flex;
+    align-items: center;
+    gap: $spacing-content-gap;
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      
+      &.status-success {
+        background-color: $success-color;
+      }
+      
+      &.status-warning {
+        background-color: $warning-color;
+      }
+      
+      &.status-error {
+        background-color: $error-color;
+      }
+      
+      &.status-default {
+        background-color: $neutral-color;
+      }
+    }
+  }
+  
+  // 数字列样式
+  .number-cell {
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    text-align: right;
+    
+    &.positive {
+      color: $up-color;
+    }
+    
+    &.negative {
+      color: $down-color;
+    }
+  }
+  
+  // 响应式
+  @include mobile {
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 8px 4px;
+      font-size: $font-size-text-small;
+    }
+    
+    .table-actions {
+      flex-direction: column;
+      gap: $spacing-content-gap;
+      
+      .ant-btn {
+        width: 100%;
+      }
+    }
+  }
+  
+  // 分页样式
+  .ant-pagination {
+    margin-top: $spacing-component-gap;
+    text-align: right;
+    
+    @include mobile {
+      text-align: center;
+      
+      .ant-pagination-options {
+        display: none;
+      }
+    }
+  }
+}

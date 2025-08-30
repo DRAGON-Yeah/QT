@@ -1,0 +1,484 @@
+/**
+ * 全局样式定义
+ */
+
+@use 'sass:color';
+@use './variables.scss' as *;
+
+// 重置样式
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
+  font-size: $font-size-text-normal;
+  color: $text-primary;
+  background-color: $background;
+  overflow-x: hidden;
+}
+
+// 链接样式
+a {
+  color: $primary-color;
+  text-decoration: none;
+  transition: $transition-fast;
+  
+  &:hover {
+    color: color.adjust($primary-color, $lightness: -10%);
+  }
+  
+  &:focus {
+    outline: 2px solid rgba($primary-color, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+// 按钮基础样式
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  
+  &:focus {
+    outline: 2px solid rgba($primary-color, 0.5);
+    outline-offset: 2px;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// 输入框基础样式
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+// 图片样式
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// 表格样式
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+// 滚动条样式
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+  
+  &:hover {
+    background: #a8a8a8;
+  }
+}
+
+// 选择文本样式
+::selection {
+  background-color: rgba($primary-color, 0.3);
+}
+
+::-moz-selection {
+  background-color: rgba($primary-color, 0.3);
+}
+
+// 应用根容器
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// 主要布局容器
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  
+  .app-sidebar {
+    width: $sidebar-width;
+    background: #001529;
+    transition: width $transition-normal;
+    
+    &.collapsed {
+      width: $sidebar-collapsed-width;
+    }
+    
+    @include mobile {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: $z-index-modal;
+      transform: translateX(-100%);
+      transition: transform $transition-normal;
+      
+      &.open {
+        transform: translateX(0);
+      }
+    }
+  }
+  
+  .app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; // 防止 flex 子元素溢出
+    
+    .app-header {
+      height: $header-height;
+      background: $white;
+      box-shadow: $shadow-light;
+      display: flex;
+      align-items: center;
+      padding: 0 $spacing-page-padding;
+      position: sticky;
+      top: 0;
+      z-index: $z-index-dropdown;
+    }
+    
+    .app-content {
+      flex: 1;
+      padding: $spacing-page-padding;
+      overflow: auto;
+      
+      @include mobile {
+        padding: $spacing-component-gap;
+      }
+    }
+  }
+}
+
+// 页面容器
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  .page-header {
+    margin-bottom: $spacing-page-padding;
+    
+    .page-title {
+      font-size: $font-size-title-large;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin-bottom: $spacing-element-gap;
+    }
+    
+    .page-description {
+      color: $text-secondary;
+      font-size: $font-size-text-normal;
+    }
+  }
+  
+  .page-content {
+    background: $white;
+    border-radius: $card-border-radius;
+    box-shadow: $shadow-light;
+    padding: $spacing-page-padding;
+    
+    @include mobile {
+      padding: $spacing-component-gap;
+    }
+  }
+}
+
+// 卡片组件
+.card {
+  @include card-style;
+  
+  .card-header {
+    padding-bottom: $spacing-element-gap;
+    border-bottom: 1px solid $border-color-light;
+    margin-bottom: $spacing-component-gap;
+    
+    .card-title {
+      font-size: $font-size-title-small;
+      font-weight: $font-weight-medium;
+      color: $text-primary;
+    }
+  }
+  
+  .card-body {
+    // 卡片内容区域
+  }
+  
+  .card-footer {
+    padding-top: $spacing-element-gap;
+    border-top: 1px solid $border-color-light;
+    margin-top: $spacing-component-gap;
+  }
+}
+
+// 表单样式
+.form-group {
+  margin-bottom: $spacing-component-gap;
+  
+  .form-label {
+    display: block;
+    margin-bottom: $spacing-content-gap;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    
+    &.required::after {
+      content: ' *';
+      color: $error-color;
+    }
+  }
+  
+  .form-control {
+    @include input-style;
+    width: 100%;
+  }
+  
+  .form-error {
+    color: $error-color;
+    font-size: $font-size-text-small;
+    margin-top: $spacing-content-gap;
+  }
+  
+  .form-help {
+    color: $text-secondary;
+    font-size: $font-size-text-small;
+    margin-top: $spacing-content-gap;
+  }
+}
+
+// 按钮组件
+.btn {
+  @include button-style($primary-color);
+  height: $button-height;
+  padding: 0 16px;
+  font-size: $font-size-text-normal;
+  font-weight: $font-weight-medium;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-content-gap;
+  
+  &.btn-large {
+    height: $button-height-large;
+    font-size: $font-size-title-small;
+    padding: 0 24px;
+  }
+  
+  &.btn-small {
+    height: $button-height-small;
+    font-size: $font-size-text-small;
+    padding: 0 8px;
+  }
+  
+  &.btn-success {
+    @include button-style($success-color);
+  }
+  
+  &.btn-warning {
+    @include button-style($warning-color);
+  }
+  
+  &.btn-danger {
+    @include button-style($error-color);
+  }
+  
+  &.btn-ghost {
+    background: transparent;
+    color: $primary-color;
+    border: 1px solid $primary-color;
+    
+    &:hover {
+      background: rgba($primary-color, 0.1);
+    }
+  }
+  
+  &.btn-text {
+    background: transparent;
+    color: $primary-color;
+    
+    &:hover {
+      background: rgba($primary-color, 0.1);
+    }
+  }
+}
+
+// 表格样式
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $white;
+  
+  th {
+    background: #fafafa;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: $font-weight-semibold;
+    border-bottom: 1px solid $border-color-light;
+    color: $text-primary;
+  }
+  
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid $border-color-light;
+    color: $text-primary;
+  }
+  
+  tr:hover {
+    background: #f5f5f5;
+  }
+  
+  .table-actions {
+    display: flex;
+    gap: $spacing-element-gap;
+    align-items: center;
+  }
+}
+
+// 加载状态
+.loading {
+  @include flex-center;
+  padding: $spacing-page-padding;
+  
+  .loading-spinner {
+    @include loading-spinner;
+  }
+}
+
+// 空状态
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-page-padding * 2;
+  color: $text-secondary;
+  
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: $spacing-component-gap;
+    opacity: 0.5;
+  }
+  
+  .empty-text {
+    font-size: $font-size-title-small;
+    margin-bottom: $spacing-element-gap;
+  }
+  
+  .empty-description {
+    font-size: $font-size-text-normal;
+  }
+}
+
+// 错误状态
+.error-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-page-padding * 2;
+  color: $error-color;
+  
+  .error-icon {
+    font-size: 48px;
+    margin-bottom: $spacing-component-gap;
+  }
+  
+  .error-title {
+    font-size: $font-size-title-small;
+    margin-bottom: $spacing-element-gap;
+  }
+  
+  .error-message {
+    font-size: $font-size-text-normal;
+    text-align: center;
+    margin-bottom: $spacing-component-gap;
+  }
+}
+
+// 响应式工具类
+@include mobile {
+  .mobile-hidden {
+    display: none !important;
+  }
+}
+
+@include tablet {
+  .tablet-hidden {
+    display: none !important;
+  }
+}
+
+@include desktop {
+  .desktop-hidden {
+    display: none !important;
+  }
+}
+
+// 动画类
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// 打印样式
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .page-container {
+    max-width: none;
+    box-shadow: none;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}

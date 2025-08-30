@@ -1,0 +1,96 @@
+/**
+ * 输入框组件样式
+ */
+
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.qt-input-wrapper {
+  margin-bottom: $spacing-component-gap;
+  
+  .qt-input__label {
+    display: block;
+    margin-bottom: $spacing-content-gap;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    font-size: $font-size-text-normal;
+    
+    &--required {
+      .qt-input__required {
+        color: $error-color;
+        margin-left: 2px;
+      }
+    }
+  }
+  
+  .qt-input {
+    width: 100%;
+    height: $input-height;
+    font-size: $font-size-text-normal;
+    border-radius: $border-radius;
+    transition: all $transition-fast;
+    
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+    }
+    
+    &--error {
+      border-color: $error-color;
+      
+      &:focus {
+        border-color: $error-color;
+        box-shadow: 0 0 0 2px rgba($error-color, 0.2);
+      }
+    }
+    
+    &::placeholder {
+      color: $text-disabled;
+    }
+  }
+  
+  .qt-textarea {
+    height: auto;
+    min-height: 80px;
+    resize: vertical;
+  }
+  
+  .qt-search {
+    .ant-input-search-button {
+      border-color: $primary-color;
+      background-color: $primary-color;
+      
+      &:hover {
+        border-color: color.adjust($primary-color, $lightness: -10%);
+        background-color: color.adjust($primary-color, $lightness: -10%);
+      }
+    }
+  }
+  
+  .qt-input__error {
+    color: $error-color;
+    font-size: $font-size-text-small;
+    margin-top: $spacing-content-gap;
+    display: flex;
+    align-items: center;
+    gap: $spacing-content-gap;
+    
+    &::before {
+      content: '⚠';
+      font-size: 12px;
+    }
+  }
+  
+  .qt-input__help {
+    color: $text-secondary;
+    font-size: $font-size-text-small;
+    margin-top: $spacing-content-gap;
+  }
+  
+  // 响应式
+  @include mobile {
+    .qt-input {
+      height: 40px; // 移动端增加高度便于触摸
+    }
+  }
+}

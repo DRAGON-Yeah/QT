@@ -1,0 +1,87 @@
+@use '../../../styles/variables.scss' as *;
+
+.icon-selector-modal {
+  .ant-modal-body {
+    padding: 16px;
+  }
+}
+
+.icon-selector {
+  .search-bar {
+    margin-bottom: 16px;
+  }
+
+  .icon-tabs {
+    .ant-tabs-content-holder {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  }
+
+  .icon-grid {
+    padding: 8px 0;
+
+    .icon-card {
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid #f0f0f0;
+
+      &:hover {
+        border-color: #1890ff;
+        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .icon-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        i {
+          font-size: 24px;
+          color: #1890ff;
+          transition: color 0.3s;
+        }
+
+        .icon-name {
+          font-size: 12px;
+          color: #8c8c8c;
+          word-break: break-all;
+          line-height: 1.2;
+        }
+      }
+
+      &:hover {
+        .icon-content {
+          i {
+            color: #40a9ff;
+          }
+
+          .icon-name {
+            color: #595959;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .icon-selector-modal {
+    .ant-modal {
+      width: 95% !important;
+      max-width: none;
+    }
+  }
+
+  .icon-selector {
+    .icon-grid {
+      .ant-col {
+        span: 6 !important;
+      }
+    }
+  }
+}

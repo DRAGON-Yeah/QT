@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantTrade 运维管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #1890ff;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #262626;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            color: #666;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            color: #1890ff;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background-color: #52c41a;
+        }
+        
+        .status-offline {
+            background-color: #f5222d;
+        }
+        
+        .status-warning {
+            background-color: #faad14;
+        }
+        
+        .alert-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            border-left: 4px solid #f5222d;
+            background-color: #fff2f0;
+        }
+        
+        .alert-time {
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        .worker-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: #fafafa;
+            border-radius: 4px;
+        }
+        
+        .worker-name {
+            font-weight: 500;
+        }
+        
+        .worker-stats {
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #1890ff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn:hover {
+            background-color: #40a9ff;
+        }
+        
+        .btn-danger {
+            background-color: #f5222d;
+        }
+        
+        .btn-danger:hover {
+            background-color: #ff4d4f;
+        }
+        
+        .btn-warning {
+            background-color: #faad14;
+        }
+        
+        .btn-warning:hover {
+            background-color: #ffc53d;
+        }
+        
+        .error-message {
+            background-color: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #f5222d;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>QuantTrade 运维管理后台</h1>
+    </div>
+    
+    <div class="container">
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="dashboard-grid">
+            <!-- 系统指标卡片 -->
+            <div class="card">
+                <div class="card-title">系统指标</div>
+                {% if system_metrics %}
+                <div class="metric-item">
+                    <span class="metric-label">CPU使用率</span>
+                    <span class="metric-value">{{ system_metrics.cpu_percent }}%</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">内存使用率</span>
+                    <span class="metric-value">{{ system_metrics.memory_percent }}%</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">磁盘使用率</span>
+                    <span class="metric-value">{{ system_metrics.disk_percent }}%</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">CPU核心数</span>
+                    <span class="metric-value">{{ system_metrics.cpu_count }}</span>
+                </div>
+                {% else %}
+                <div class="loading">暂无系统指标数据</div>
+                {% endif %}
+            </div>
+            
+            <!-- Celery Workers卡片 -->
+            <div class="card">
+                <div class="card-title">Celery Workers</div>
+                {% if workers %}
+                    {% for worker in workers %}
+                    <div class="worker-item">
+                        <div>
+                            <span class="status-indicator status-{{ worker.status }}"></span>
+                            <span class="worker-name">{{ worker.worker_name }}</span>
+                        </div>
+                        <div class="worker-stats">
+                            活跃: {{ worker.active_tasks }} | 已处理: {{ worker.processed_tasks }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="loading">没有发现活跃的Worker</div>
+                {% endif %}
+            </div>
+            
+            <!-- 最近任务卡片 -->
+            <div class="card">
+                <div class="card-title">最近任务</div>
+                {% if recent_tasks %}
+                    {% for task in recent_tasks %}
+                    <div class="worker-item">
+                        <div>
+                            <span class="status-indicator status-{% if task.state == 'SUCCESS' %}online{% elif task.state == 'FAILURE' %}offline{% else %}warning{% endif %}"></span>
+                            <span class="worker-name">{{ task.task_name }}</span>
+                        </div>
+                        <div class="worker-stats">{{ task.state }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="loading">暂无最近任务</div>
+                {% endif %}
+            </div>
+            
+            <!-- 告警信息卡片 -->
+            <div class="card">
+                <div class="card-title">最近告警 ({{ total_alerts }})</div>
+                {% if recent_alerts %}
+                    {% for alert in recent_alerts %}
+                    <div class="alert-item">
+                        <div>{{ alert.message }}</div>
+                        <div class="alert-time">{{ alert.fired_at|date:"Y-m-d H:i:s" }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="loading">暂无告警信息</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="card">
+            <div class="card-title">快速操作</div>
+            <button class="btn" onclick="refreshData()">刷新数据</button>
+            <button class="btn btn-warning" onclick="clearCache()">清理缓存</button>
+            <button class="btn btn-danger" onclick="emergencyStop()">紧急停止</button>
+            <a href="/admin/monitoring/logs/" class="btn">查看日志</a>
+            <a href="/admin/monitoring/celery/" class="btn">Celery管理</a>
+        </div>
+    </div>
+    
+    <script>
+        // 刷新数据
+        function refreshData() {
+            location.reload();
+        }
+        
+        // 清理缓存
+        function clearCache() {
+            if (confirm('确定要清理所有缓存吗？')) {
+                fetch('/admin/monitoring/emergency/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({action: 'clear_cache'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error);
+                    if (data.message) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    alert('操作失败: ' + error);
+                });
+            }
+        }
+        
+        // 紧急停止
+        function emergencyStop() {
+            if (confirm('确定要停止所有任务吗？这是紧急操作！')) {
+                fetch('/admin/monitoring/emergency/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({action: 'stop_all_tasks'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error);
+                    if (data.message) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    alert('操作失败: ' + error);
+                });
+            }
+        }
+        
+        // 获取CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 自动刷新（每30秒）
+        setInterval(function() {
+            // 可以在这里添加AJAX刷新逻辑，避免整页刷新
+        }, 30000);
+    </script>
+</body>
+</html>

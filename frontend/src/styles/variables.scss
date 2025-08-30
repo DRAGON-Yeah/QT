@@ -1,0 +1,292 @@
+/**
+ * SCSS 全局变量定义
+ * 与 TypeScript 常量保持一致
+ */
+
+@use 'sass:color';
+
+// 主色调
+$primary-color: #1890ff;
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #f5222d;
+$info-color: #1890ff;
+
+// 交易专用色彩
+$up-color: #52c41a;      // 上涨绿色
+$down-color: #f5222d;    // 下跌红色
+$neutral-color: #8c8c8c; // 平盘灰色
+
+// 风险等级色彩
+$risk-low: #52c41a;      // 低风险
+$risk-medium: #faad14;   // 中风险
+$risk-high: #f5222d;     // 高风险
+
+// 中性色
+$text-primary: #262626;   // 主要文字
+$text-secondary: #8c8c8c; // 次要文字
+$text-disabled: #bfbfbf;  // 禁用文字
+$background: #f5f5f5;     // 页面背景
+$white: #ffffff;          // 纯白
+$black: #000000;          // 纯黑
+
+// 字体大小
+$font-size-title-large: 24px;  // 主标题
+$font-size-title-medium: 20px; // 次标题
+$font-size-title-small: 16px;  // 小标题
+$font-size-text-normal: 14px;  // 正文
+$font-size-text-small: 12px;   // 辅助文字
+
+// 字体权重
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// 间距
+$spacing-page-padding: 24px;   // 页面边距
+$spacing-component-gap: 16px;  // 组件间距
+$spacing-element-gap: 8px;     // 元素间距
+$spacing-content-gap: 4px;     // 内容间距
+
+// 组件尺寸
+$button-height: 32px;
+$button-height-large: 48px;
+$button-height-small: 24px;
+$input-height: 32px;
+$card-border-radius: 6px;
+$sidebar-width: 240px;
+$sidebar-collapsed-width: 64px;
+$header-height: 64px;
+
+// 响应式断点
+$breakpoint-xs: 0px;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;   // 平板端
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;  // 桌面端
+$breakpoint-xxl: 1600px;
+
+// 阴影
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.15);
+$shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+$shadow-heavy: 0 6px 16px rgba(0, 0, 0, 0.15);
+
+// 边框
+$border-color: #d9d9d9;
+$border-color-light: #f0f0f0;
+$border-radius: 6px;
+$border-radius-small: 4px;
+$border-radius-large: 8px;
+
+// 过渡动画
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Z-index 层级
+$z-index-dropdown: 1000;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-notification: 1080;
+
+// 混合器 (Mixins)
+
+// 响应式断点混合器
+@mixin mobile {
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$breakpoint-md}) and (max-width: #{$breakpoint-xl - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$breakpoint-xl}) {
+    @content;
+  }
+}
+
+// 文字省略混合器
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Flexbox 居中混合器
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-center-vertical {
+  display: flex;
+  align-items: center;
+}
+
+@mixin flex-center-horizontal {
+  display: flex;
+  justify-content: center;
+}
+
+// 清除浮动混合器
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+// 按钮样式混合器
+@mixin button-style($bg-color, $text-color: $white, $hover-opacity: 0.8) {
+  background-color: $bg-color;
+  color: $text-color;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: $transition-fast;
+  
+  &:hover {
+    opacity: $hover-opacity;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// 卡片样式混合器
+@mixin card-style {
+  background: $white;
+  border-radius: $card-border-radius;
+  box-shadow: $shadow-light;
+  padding: $spacing-component-gap;
+}
+
+// 输入框样式混合器
+@mixin input-style {
+  height: $input-height;
+  padding: 0 12px;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  font-size: $font-size-text-normal;
+  transition: $transition-fast;
+  
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    outline: none;
+  }
+  
+  &.error {
+    border-color: $error-color;
+  }
+}
+
+// 滚动条样式混合器
+@mixin custom-scrollbar($width: 6px, $track-color: #f1f1f1, $thumb-color: #c1c1c1) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+    border-radius: $width / 2;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: $width / 2;
+    
+    &:hover {
+      background: color.adjust($thumb-color, $lightness: -10%);
+    }
+  }
+}
+
+// 加载动画混合器
+@mixin loading-spinner($size: 20px, $color: $primary-color) {
+  width: $size;
+  height: $size;
+  border: 2px solid rgba($color, 0.3);
+  border-top: 2px solid $color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// 工具类
+
+// 间距工具类
+.m-0 { margin: 0; }
+.m-1 { margin: $spacing-content-gap; }
+.m-2 { margin: $spacing-element-gap; }
+.m-3 { margin: $spacing-component-gap; }
+.m-4 { margin: $spacing-page-padding; }
+
+.p-0 { padding: 0; }
+.p-1 { padding: $spacing-content-gap; }
+.p-2 { padding: $spacing-element-gap; }
+.p-3 { padding: $spacing-component-gap; }
+.p-4 { padding: $spacing-page-padding; }
+
+// 文字对齐工具类
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+// 文字颜色工具类
+.text-primary { color: $text-primary; }
+.text-secondary { color: $text-secondary; }
+.text-success { color: $success-color; }
+.text-warning { color: $warning-color; }
+.text-error { color: $error-color; }
+.text-up { color: $up-color; }
+.text-down { color: $down-color; }
+
+// 显示/隐藏工具类
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+
+// 响应式显示工具类
+.d-mobile-none {
+  @include mobile {
+    display: none !important;
+  }
+}
+
+.d-tablet-none {
+  @include tablet {
+    display: none !important;
+  }
+}
+
+.d-desktop-none {
+  @include desktop {
+    display: none !important;
+  }
+}

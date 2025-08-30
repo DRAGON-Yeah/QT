@@ -1,0 +1,99 @@
+/**
+ * 仪表盘页面样式
+ */
+
+@use '@/styles/variables.scss' as *;
+
+.dashboard-page {
+  .page-header {
+    margin-bottom: $spacing-page-padding;
+    
+    .page-title {
+      font-size: $font-size-title-large;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin-bottom: $spacing-element-gap;
+    }
+    
+    .page-description {
+      color: $text-secondary;
+      font-size: $font-size-text-normal;
+      margin: 0;
+    }
+  }
+  
+  .dashboard-content {
+    .stats-row {
+      margin-bottom: $spacing-page-padding;
+    }
+    
+    .charts-row {
+      margin-bottom: $spacing-page-padding;
+      
+      .chart-card {
+        height: 400px;
+        
+        .chart-placeholder {
+          height: 300px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #fafafa;
+          border-radius: $border-radius;
+          color: $text-secondary;
+          
+          p {
+            margin: $spacing-content-gap 0;
+            text-align: center;
+          }
+        }
+      }
+    }
+    
+    .actions-row {
+      .action-card {
+        height: 200px;
+        
+        .action-content {
+          height: 120px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: $text-secondary;
+          
+          p {
+            margin: $spacing-content-gap 0;
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+  
+  // 响应式
+  @include mobile {
+    .dashboard-content {
+      .charts-row {
+        .chart-card {
+          height: 300px;
+          
+          .chart-placeholder {
+            height: 200px;
+          }
+        }
+      }
+      
+      .actions-row {
+        .action-card {
+          height: 150px;
+          
+          .action-content {
+            height: 80px;
+          }
+        }
+      }
+    }
+  }
+}

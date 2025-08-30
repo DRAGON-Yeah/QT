@@ -1,0 +1,111 @@
+# QuantTrade 开发环境 Docker Compose 配置
+
+services:
+  # PostgreSQL 数据库
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: quanttrade_dev
+      POSTGRES_USER: quanttrade
+      POSTGRES_PASSWORD: quanttrade123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Redis 缓存和消息队列
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Django 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://quanttrade:quanttrade123@db:5432/quanttrade_dev
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Celery Worker
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://quanttrade:quanttrade123@db:5432/quanttrade_dev
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: celery -A config worker -l info
+
+  # Celery Beat (定时任务)
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://quanttrade:quanttrade123@db:5432/quanttrade_dev
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: celery -A config beat -l info
+
+  # React 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_media:
+  backend_static:
+
+networks:
+  default:
+    name: quanttrade_network

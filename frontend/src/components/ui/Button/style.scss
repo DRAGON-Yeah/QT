@@ -1,0 +1,149 @@
+/**
+ * 按钮组件样式
+ */
+
+@use 'sass:color';
+@use '@/styles/variables.scss' as *;
+
+.qt-button {
+  font-weight: $font-weight-medium;
+  transition: all $transition-fast;
+  border-radius: $border-radius;
+  
+  // 尺寸变体
+  &--small {
+    height: $button-height-small;
+    padding: 0 8px;
+    font-size: $font-size-text-small;
+  }
+  
+  &--middle {
+    height: $button-height;
+    padding: 0 16px;
+    font-size: $font-size-text-normal;
+  }
+  
+  &--large {
+    height: $button-height-large;
+    padding: 0 24px;
+    font-size: $font-size-title-small;
+  }
+  
+  // 颜色变体
+  &--success {
+    background-color: $success-color;
+    border-color: $success-color;
+    
+    &:hover, &:focus {
+      background-color: color.adjust($success-color, $lightness: -10%);
+      border-color: color.adjust($success-color, $lightness: -10%);
+    }
+  }
+  
+  &--warning {
+    background-color: $warning-color;
+    border-color: $warning-color;
+    
+    &:hover, &:focus {
+      background-color: color.adjust($warning-color, $lightness: -10%);
+      border-color: color.adjust($warning-color, $lightness: -10%);
+    }
+  }
+  
+  &--danger {
+    background-color: $error-color;
+    border-color: $error-color;
+    
+    &:hover, &:focus {
+      background-color: color.adjust($error-color, $lightness: -10%);
+      border-color: color.adjust($error-color, $lightness: -10%);
+    }
+  }
+  
+  &--ghost {
+    &.qt-button--success {
+      color: $success-color;
+      border-color: $success-color;
+      
+      &:hover, &:focus {
+        color: color.adjust($success-color, $lightness: -10%);
+        border-color: color.adjust($success-color, $lightness: -10%);
+        background-color: rgba($success-color, 0.1);
+      }
+    }
+    
+    &.qt-button--warning {
+      color: $warning-color;
+      border-color: $warning-color;
+      
+      &:hover, &:focus {
+        color: color.adjust($warning-color, $lightness: -10%);
+        border-color: color.adjust($warning-color, $lightness: -10%);
+        background-color: rgba($warning-color, 0.1);
+      }
+    }
+    
+    &.qt-button--danger {
+      color: $error-color;
+      border-color: $error-color;
+      
+      &:hover, &:focus {
+        color: color.adjust($error-color, $lightness: -10%);
+        border-color: color.adjust($error-color, $lightness: -10%);
+        background-color: rgba($error-color, 0.1);
+      }
+    }
+  }
+  
+  &--text {
+    &.qt-button--success {
+      color: $success-color;
+      
+      &:hover, &:focus {
+        color: color.adjust($success-color, $lightness: -10%);
+        background-color: rgba($success-color, 0.1);
+      }
+    }
+    
+    &.qt-button--warning {
+      color: $warning-color;
+      
+      &:hover, &:focus {
+        color: color.adjust($warning-color, $lightness: -10%);
+        background-color: rgba($warning-color, 0.1);
+      }
+    }
+    
+    &.qt-button--danger {
+      color: $error-color;
+      
+      &:hover, &:focus {
+        color: color.adjust($error-color, $lightness: -10%);
+        background-color: rgba($error-color, 0.1);
+      }
+    }
+  }
+  
+  // 状态
+  &--loading {
+    pointer-events: none;
+  }
+  
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  
+  &--block {
+    width: 100%;
+  }
+  
+  // 响应式
+  @include mobile {
+    &--large {
+      height: $button-height;
+      font-size: $font-size-text-normal;
+    }
+  }
+}
